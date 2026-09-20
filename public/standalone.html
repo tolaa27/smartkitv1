@@ -1,0 +1,3650 @@
+<!DOCTYPE html>
+<html lang="km" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>កុមារឆ្លាត (SmartKids Cambodia) - កម្មវិធីសិក្សាអន្តរកម្មកម្រិតបឋមសិក្សា</title>
+
+  <!-- Google Fonts: Kantumruy Pro, Fredoka, Battambang -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700;900&family=Fredoka:wght@400;500;600;700&family=Kantumruy+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            khmer: ['"Kantumruy Pro"', 'Battambang', 'sans-serif'],
+            kantumruy: ['"Kantumruy Pro"', 'sans-serif'],
+            display: ['Fredoka', '"Kantumruy Pro"', 'sans-serif'],
+            heading: ['Battambang', 'Fredoka', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              yellow: '#FBBF24',
+              orange: '#F97316',
+              blue: '#0EA5E9',
+              green: '#22C55E',
+              purple: '#A855F7',
+              red: '#EF4444',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- React 19 & React DOM 19 UMD -->
+  <script src="https://unpkg.com/react@19/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@19/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel Standalone for JSX/ES6 compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* CSS Reset & Anti-Clipping Typography Safeguards */
+    body {
+      font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #FFFDF7;
+      color: #1E293B;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    .font-khmer, .font-kantumruy {
+      font-family: 'Kantumruy Pro', 'Battambang', sans-serif;
+      line-height: 1.75 !important;
+      overflow: visible !important;
+      padding-top: 0.15rem;
+      padding-bottom: 0.15rem;
+    }
+    .font-display {
+      font-family: 'Fredoka', 'Kantumruy Pro', sans-serif;
+      overflow: visible;
+    }
+    .font-heading {
+      font-family: 'Battambang', 'Fredoka', sans-serif;
+      line-height: 1.6;
+      overflow: visible;
+    }
+    .btn-kid {
+      transition: all 0.12s ease-in-out;
+      box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.16);
+    }
+    .btn-kid:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.16);
+    }
+    .animate-shake {
+      animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(3px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop-in {
+      animation: popIn 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #FEF3C7; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: #FBBF24; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #F59E0B; }
+  </style>
+</head>
+<body class="h-full">
+  <div id="root" class="min-h-screen flex flex-col"></div>
+
+  <!-- Main Application Script (Babel / React 19) -->
+  <script type="text/babel">
+
+    const { useState, useEffect, useMemo, useCallback, useRef, memo } = React;
+
+    // =========================================================================
+    // INLINE VECTOR SVG ICONS (Zero CDN or Image Dependencies)
+    // =========================================================================
+    const IconVolume = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      </svg>
+    );
+
+    const IconVolumeOff = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <line x1="23" y1="9" x2="17" y2="15" />
+        <line x1="17" y1="9" x2="23" y2="15" />
+      </svg>
+    );
+
+    const IconStar = ({ className = "w-5 h-5", filled = true }) => (
+      <svg className={className} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+      </svg>
+    );
+
+    const IconSparkles = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+        <path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" />
+      </svg>
+    );
+
+    const IconRotateCcw = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>
+    );
+
+    const IconCheck = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    );
+
+    const IconCheckCircle = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    );
+
+    const IconX = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    );
+
+    const IconArrowLeft = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12" />
+        <polyline points="12 19 5 12 12 5" />
+      </svg>
+    );
+
+    const IconArrowRight = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 19 12 12 19" />
+      </svg>
+    );
+
+    const IconPlay = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+        <polygon points="5 3 19 12 5 21 5 3" />
+      </svg>
+    );
+
+    const IconTrophy = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" />
+        <path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34" />
+        <path d="M18 4H6v7a6 6 0 0 0 12 0V4Z" />
+      </svg>
+    );
+
+    const IconBook = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+        <path d="M6 6h10" /><path d="M6 10h10" />
+      </svg>
+    );
+
+    const IconCalculator = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="16" height="20" x="4" y="2" rx="2" />
+        <line x1="8" x2="16" y1="6" y2="6" />
+        <line x1="16" x2="16" y1="14" y2="18" />
+        <path d="M8 10h.01" /><path d="M12 10h.01" /><path d="M16 10h.01" />
+        <path d="M8 14h.01" /><path d="M12 14h.01" />
+        <path d="M8 18h.01" /><path d="M12 18h.01" />
+      </svg>
+    );
+
+    const IconCompass = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+      </svg>
+    );
+
+    const IconPlus = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+    );
+
+    const IconTrash = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+      </svg>
+    );
+
+    const IconDownload = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+    );
+
+    const IconUpload = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="17 8 12 3 7 8" />
+        <line x1="12" y1="3" x2="12" y2="15" />
+      </svg>
+    );
+
+    const IconSearch = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    );
+
+    const IconScale = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+        <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+        <path d="M7 21h10" /><path d="M12 3v18" /><path d="M3 7h18" />
+      </svg>
+    );
+
+    const IconDrum = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <ellipse cx="12" cy="8" rx="10" ry="4" />
+        <path d="M2 8v8c0 2.21 4.48 4 10 4s10-1.79 10-4V8" />
+        <path d="m5 10 7 4" /><path d="m19 10-7 4" />
+      </svg>
+    );
+
+    const IconTrain = ({ className = "w-5 h-5" }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="16" height="16" x="4" y="3" rx="2" />
+        <path d="M4 11h16" />
+        <path d="M12 3v8" />
+        <path d="m8 19-2 3" /><path d="m18 22-2-3" />
+        <circle cx="8" cy="15" r="1" /><circle cx="16" cy="15" r="1" />
+      </svg>
+    );
+
+    // =========================================================================
+    // HIGH-PERFORMANCE PROCEDURAL WEB AUDIO API & DUAL-TIER SPEECH ENGINE
+    // =========================================================================
+    class SoundFX {
+      static ctx = null;
+      static isUnlocked = false;
+      static soundEnabled = true;
+
+      static init() {
+        if (typeof window === 'undefined') return null;
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        if (!this.isUnlocked) {
+          this.isUnlocked = true;
+          const unlock = () => {
+            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+          };
+          window.addEventListener('click', unlock, { once: true, passive: true });
+          window.addEventListener('touchstart', unlock, { once: true, passive: true });
+        }
+        return this.ctx;
+      }
+
+      static toggleSound(val) {
+        this.soundEnabled = val !== undefined ? val : !this.soundEnabled;
+        try { localStorage.setItem('smartkids_sound', this.soundEnabled ? 'true' : 'false'); } catch(e){}
+        return this.soundEnabled;
+      }
+
+      static isEnabled() {
+        try {
+          const stored = localStorage.getItem('smartkids_sound');
+          if (stored !== null) this.soundEnabled = stored === 'true';
+        } catch(e){}
+        return this.soundEnabled;
+      }
+
+      // Pentatonic Success Chord: C5, E5, G5, C6
+      static playSuccess() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          const now = ctx.currentTime;
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            const st = now + idx * 0.08;
+            osc.frequency.setValueAtTime(freq, st);
+            gain.gain.setValueAtTime(0.22, st);
+            gain.gain.exponentialRampToValueAtTime(0.001, st + 0.45);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(st);
+            osc.stop(st + 0.48);
+            osc.onended = () => osc.disconnect();
+          });
+        } catch(e){}
+      }
+
+      // Gentle Non-Punitive Warm Error Thud: 180Hz -> 110Hz
+      static playGentleError() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.18);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.24);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+
+      static playSnap() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(1600, now);
+          osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+
+      static playPop() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.05);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+
+      static playCoin() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(987.77, now);
+          osc.frequency.setValueAtTime(1318.51, now + 0.07);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+
+      static playStar() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98];
+          const now = ctx.currentTime;
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            const st = now + idx * 0.07;
+            osc.frequency.setValueAtTime(freq, st);
+            gain.gain.setValueAtTime(0.2, st);
+            gain.gain.exponentialRampToValueAtTime(0.0001, st + 0.55);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(st);
+            osc.stop(st + 0.6);
+            osc.onended = () => osc.disconnect();
+          });
+        } catch(e){}
+      }
+
+      static playWhistle() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const freqs = [440, 554.37];
+          const now = ctx.currentTime;
+          freqs.forEach(freq => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.38);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.42);
+            osc.onended = () => osc.disconnect();
+          });
+        } catch(e){}
+      }
+
+      static playMagnet() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(2400, now);
+          osc.frequency.exponentialRampToValueAtTime(1400, now + 0.08);
+          gain.gain.setValueAtTime(0.28, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+
+      static playBoing() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.exponentialRampToValueAtTime(680, now + 0.12);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+
+      static playCashDrawer() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1760, now);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.38);
+          osc.onended = () => osc.disconnect();
+          setTimeout(() => this.playCoin(), 70);
+        } catch(e){}
+      }
+
+      static playSoap() {
+        if (!this.isEnabled()) return;
+        const ctx = this.init();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(700 + Math.random() * 200, now);
+          osc.frequency.exponentialRampToValueAtTime(1100, now + 0.05);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+    }
+
+    class SpeechEngine {
+      static synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
+      static fallbackAudio = typeof window !== 'undefined' ? new Audio() : null;
+      static subtitleListeners = new Set();
+      static subtitleTimeout = null;
+
+      static addSubtitleListener(fn) {
+        this.subtitleListeners.add(fn);
+        return () => this.subtitleListeners.delete(fn);
+      }
+
+      static notifySubtitles(text, isSpeaking, durationMs = 3000) {
+        if (this.subtitleTimeout) {
+          clearTimeout(this.subtitleTimeout);
+          this.subtitleTimeout = null;
+        }
+        this.subtitleListeners.forEach(fn => fn(text, isSpeaking));
+        if (isSpeaking && text) {
+          this.subtitleTimeout = setTimeout(() => {
+            this.subtitleListeners.forEach(fn => fn(null, false));
+          }, durationMs);
+        }
+      }
+
+      static speak(text, lang = 'km-KH') {
+        if (!text || typeof window === 'undefined') return;
+        SoundFX.init();
+
+        const containsKhmer = /[ក-៿]/.test(text);
+        const targetLang = lang || (containsKhmer ? 'km-KH' : 'en-US');
+
+        this.notifySubtitles(text, true, Math.max(2500, text.length * 85));
+
+        if (this.synth) {
+          try { this.synth.cancel(); } catch(e){}
+        }
+
+        const voices = this.synth ? this.synth.getVoices() : [];
+        const hasNativeKhmer = voices.some(v =>
+          v.lang.toLowerCase().includes('km') || v.lang.toLowerCase().includes('kh') || v.name.toLowerCase().includes('khmer')
+        );
+
+        if (targetLang === 'km-KH' && !hasNativeKhmer) {
+          this.speakFallbackURL(text, 'km-KH');
+          return;
+        }
+
+        if (this.synth) {
+          try {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = targetLang;
+            u.rate = targetLang === 'km-KH' ? 0.85 : 0.9;
+            u.pitch = 1.05;
+            const matched = voices.find(v =>
+              targetLang === 'km-KH'
+                ? v.lang.toLowerCase().includes('km') || v.name.toLowerCase().includes('khmer')
+                : v.lang.toLowerCase().includes('en')
+            );
+            if (matched) u.voice = matched;
+            u.onend = () => this.notifySubtitles(null, false);
+            u.onerror = () => this.speakFallbackURL(text, targetLang);
+            this.synth.speak(u);
+          } catch(e) {
+            this.speakFallbackURL(text, targetLang);
+          }
+        } else {
+          this.speakFallbackURL(text, targetLang);
+        }
+      }
+
+      static speakFallbackURL(text, lang = 'km-KH') {
+        try {
+          if (!this.fallbackAudio) this.fallbackAudio = new Audio();
+          this.fallbackAudio.pause();
+          const encoded = encodeURIComponent(text.slice(0, 180));
+          const tl = lang === 'km-KH' ? 'km' : 'en';
+          this.fallbackAudio.src = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=${tl}&client=tw-ob`;
+          this.fallbackAudio.onended = () => this.notifySubtitles(null, false);
+          this.fallbackAudio.onerror = () => this.playMelodicHint();
+          const p = this.fallbackAudio.play();
+          if (p !== undefined) {
+            p.catch(() => this.playMelodicHint());
+          }
+        } catch(e) {
+          this.playMelodicHint();
+        }
+      }
+
+      static playMelodicHint() {
+        const ctx = SoundFX.init();
+        if (!ctx) return;
+        try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          const now = ctx.currentTime;
+          osc.frequency.setValueAtTime(783.99, now);
+          osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.15);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.35);
+          osc.onended = () => osc.disconnect();
+        } catch(e){}
+      }
+
+      static stop() {
+        if (this.synth) {
+          try { this.synth.cancel(); } catch(e){}
+        }
+        if (this.fallbackAudio) {
+          try {
+            this.fallbackAudio.pause();
+            this.fallbackAudio.currentTime = 0;
+          } catch(e){}
+        }
+        this.notifySubtitles(null, false);
+      }
+    }
+
+    // Decoupled Sound Event Bus
+    const SoundBus = {
+      playSuccess: () => SoundFX.playSuccess(),
+      playGentleError: () => SoundFX.playGentleError(),
+      playSnap: () => SoundFX.playSnap(),
+      playPop: () => SoundFX.playPop(),
+      playCoin: () => SoundFX.playCoin(),
+      playStar: () => SoundFX.playStar(),
+      playWhistle: () => SoundFX.playWhistle(),
+      playMagnet: () => SoundFX.playMagnet(),
+      playBoing: () => SoundFX.playBoing(),
+      playCashDrawer: () => SoundFX.playCashDrawer(),
+      playSoap: () => SoundFX.playSoap(),
+      speak: (text, lang) => SpeechEngine.speak(text, lang),
+      stopSpeech: () => SpeechEngine.stop(),
+    };
+
+    const SpeakerButton = memo(({ text, size = 'sm', className = '' }) => {
+      const [active, setActive] = useState(false);
+      const handleSpeak = (e) => {
+        e.stopPropagation();
+        setActive(true);
+        SoundBus.speak(text);
+        setTimeout(() => setActive(false), 900);
+      };
+      const sizeClasses = size === 'xs' ? 'w-6 h-6 p-1 text-xs' : size === 'lg' ? 'w-12 h-12 p-2.5 text-base' : 'w-8 h-8 p-1.5 text-sm';
+      return (
+        <button
+          onClick={handleSpeak}
+          title="ស្ដាប់សំឡេង (Listen)"
+          className={`rounded-full bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 flex items-center justify-center transition-all cursor-pointer ${active ? 'scale-115 ring-2 ring-amber-400 bg-amber-200' : ''} ${sizeClasses} ${className}`}
+        >
+          <IconVolume className="w-full h-full text-amber-800" />
+        </button>
+      );
+    });
+
+    // =========================================================================
+    // MOEYS CAMBODIAN PRIMARY CURRICULUM CATALOG & PRESETS
+    // =========================================================================
+    const CURRICULUM_GAMES = [
+      // ENGINE A: Sorter Games
+      {
+        id: 'sorter-food-3',
+        engineType: 'sorter',
+        titleKhmer: 'ប្រអប់បាយសុខភាព (ក្រុមអាហារទាំង៣)',
+        titleEnglish: '3 Food Groups Balanced Bento',
+        grade: 2,
+        subject: 'science',
+        icon: '🍱',
+        promptText: 'សូមបែងចែកអាហារខាងក្រោមទៅក្នុងក្រុមអាហារទាំង៣ ឲ្យបានត្រឹមត្រូវ៖',
+        data: {
+          mode: 'food_groups',
+          bins: [
+            { id: 'b-energy', nameKhmer: 'ថាមពល (Energy)', colorClass: 'from-amber-500 to-amber-600', icon: '🍚' },
+            { id: 'b-growth', nameKhmer: 'លូតលាស់ (Growth)', colorClass: 'from-emerald-500 to-emerald-600', icon: '🐟' },
+            { id: 'b-protection', nameKhmer: 'ការពារ (Protection)', colorClass: 'from-sky-500 to-sky-600', icon: '🥦' },
+          ],
+          entities: [
+            { id: 'e-1', nameKhmer: 'បាយផ្ការំដួល', icon: '🍚', correctBinId: 'b-energy' },
+            { id: 'e-2', nameKhmer: 'ត្រីអាំង', icon: '🐟', correctBinId: 'b-growth' },
+            { id: 'e-3', nameKhmer: 'សម្លកកូរ/បន្លែ', icon: '🥦', correctBinId: 'b-protection' },
+            { id: 'e-4', nameKhmer: 'ដំឡូងជ្វា', icon: '🍠', correctBinId: 'b-energy' },
+            { id: 'e-5', nameKhmer: 'ស៊ុតទា', icon: '🥚', correctBinId: 'b-growth' },
+            { id: 'e-6', nameKhmer: 'ផ្លែស្វាយទុំ', icon: '🥭', correctBinId: 'b-protection' },
+          ]
+        }
+      },
+      {
+        id: 'sorter-eco-trash',
+        engineType: 'sorter',
+        titleKhmer: 'បែងចែកសំរាមឆ្លាត (Eco Trash Sorter)',
+        titleEnglish: 'Smart Eco Trash Classification',
+        grade: 1,
+        subject: 'science',
+        icon: '♻️',
+        promptText: 'សូមបែងចែកសំរាមទៅក្នុងធុងនីមួយៗឲ្យបានត្រឹមត្រូវដើម្បីការពារបរិស្ថាន៖',
+        data: {
+          mode: 'eco_trash',
+          bins: [
+            { id: 'b-organic', nameKhmer: 'សរីរាង្គ', colorClass: 'from-emerald-500 to-emerald-600', icon: '🍏' },
+            { id: 'b-plastic', nameKhmer: 'ប្លាស្ទិក/ជ័រ', colorClass: 'from-amber-400 to-amber-500', icon: '🧴' },
+            { id: 'b-paper', nameKhmer: 'ក្រដាស', colorClass: 'from-sky-400 to-sky-500', icon: '📦' },
+            { id: 'b-hazard', nameKhmer: 'គ្រោះថ្នាក់', colorClass: 'from-rose-500 to-rose-600', icon: '🔋' },
+          ],
+          entities: [
+            { id: 'e-1', nameKhmer: 'សំបកចេក', icon: '🍌', correctBinId: 'b-organic' },
+            { id: 'e-2', nameKhmer: 'ដបទឹកសុទ្ធ', icon: '🍾', correctBinId: 'b-plastic' },
+            { id: 'e-3', nameKhmer: 'កេសក្រដាស', icon: '📦', correctBinId: 'b-paper' },
+            { id: 'e-4', nameKhmer: 'ថ្មពិលចាស់', icon: '🔋', correctBinId: 'b-hazard' },
+            { id: 'e-5', nameKhmer: 'ស្លឹកឈើជ្រុះ', icon: '🍂', correctBinId: 'b-organic' },
+            { id: 'e-6', nameKhmer: 'ថង់ប្លាស្ទិក', icon: '🛍️', correctBinId: 'b-plastic' },
+          ]
+        }
+      },
+      {
+        id: 'sorter-phonetic-series',
+        engineType: 'sorter',
+        titleKhmer: 'សំឡេងពួក អ និងពួក អ៊ (Consonant Registers)',
+        titleEnglish: 'Consonant Series O vs OR Classification',
+        grade: 1,
+        subject: 'khmer',
+        icon: '🔤',
+        promptText: 'សូមបែងចែកព្យញ្ជនៈខ្មែរទៅតាមពួក អ (សំឡេងស្រាល) និងពួក អ៊ (សំឡេងធ្ងន់)៖',
+        data: {
+          mode: 'phonetic_series',
+          bins: [
+            { id: 'b-o', nameKhmer: 'ពួក អ (Series O)', colorClass: 'from-sky-500 to-sky-600', icon: '☀️' },
+            { id: 'b-or', nameKhmer: 'ពួក អ៊ (Series OR)', colorClass: 'from-indigo-500 to-indigo-600', icon: '🌊' },
+          ],
+          entities: [
+            { id: 'c-1', nameKhmer: 'ក (ក)', icon: 'ក', correctBinId: 'b-o' },
+            { id: 'c-2', nameKhmer: 'គ (គ)', icon: 'គ', correctBinId: 'b-or' },
+            { id: 'c-3', nameKhmer: 'ខ (ខ)', icon: 'ខ', correctBinId: 'b-o' },
+            { id: 'c-4', nameKhmer: 'ឃ (ឃ)', icon: 'ឃ', correctBinId: 'b-or' },
+            { id: 'c-5', nameKhmer: 'ច (ច)', icon: 'ច', correctBinId: 'b-o' },
+            { id: 'c-6', nameKhmer: 'ជ (ជ)', icon: 'ជ', correctBinId: 'b-or' },
+          ]
+        }
+      },
+      {
+        id: 'sorter-grammar-bins',
+        engineType: 'sorter',
+        titleKhmer: 'ឃ្លាំងពាក្យ នាម កិរិយា គុណនាម',
+        titleEnglish: 'Khmer Parts of Speech Sorter',
+        grade: 3,
+        subject: 'khmer',
+        icon: '📖',
+        promptText: 'សូមបែងចែកពាក្យខាងក្រោមទៅក្នុងប្រភេទវេយ្យាករណ៍ដែលត្រូវគ្នា៖',
+        data: {
+          mode: 'grammar',
+          bins: [
+            { id: 'b-noun', nameKhmer: 'នាម (Noun)', colorClass: 'from-blue-500 to-blue-600', icon: '🏛️' },
+            { id: 'b-verb', nameKhmer: 'កិរិយា (Verb)', colorClass: 'from-emerald-500 to-emerald-600', icon: '🏃' },
+            { id: 'b-adj', nameKhmer: 'គុណនាម (Adjective)', colorClass: 'from-purple-500 to-purple-600', icon: '✨' },
+          ],
+          entities: [
+            { id: 'g-1', nameKhmer: 'សាលារៀន', icon: '🏫', correctBinId: 'b-noun' },
+            { id: 'g-2', nameKhmer: 'រត់លឿន', icon: '🏃', correctBinId: 'b-verb' },
+            { id: 'g-3', nameKhmer: 'ស្រស់ស្អាត', icon: '🌸', correctBinId: 'b-adj' },
+            { id: 'g-4', nameKhmer: 'សៀវភៅ', icon: '📚', correctBinId: 'b-noun' },
+            { id: 'g-5', nameKhmer: 'អាន', icon: '📖', correctBinId: 'b-verb' },
+            { id: 'g-6', nameKhmer: 'ធំធេង', icon: '🐘', correctBinId: 'b-adj' },
+          ]
+        }
+      },
+
+      // ENGINE B: Sandbox Games
+      {
+        id: 'sandbox-germination',
+        engineType: 'sandbox',
+        titleKhmer: 'ពិសោធដុះពន្លក (Plant Germination Lab)',
+        titleEnglish: 'Biological Plant Growth Simulator',
+        grade: 2,
+        subject: 'science',
+        icon: '🌱',
+        promptText: 'សារ៉េពន្លឺថ្ងៃ និងទឹកដី ឲ្យនៅក្នុងកម្រិតសមស្របដើម្បីឲ្យរុក្ខជាតិលូតលាស់ចេញផ្កា៖',
+        data: { mode: 'germination' }
+      },
+      {
+        id: 'sandbox-germ-buster',
+        engineType: 'sandbox',
+        titleKhmer: 'កម្ចាត់មេរោគដោយសាប៊ូ (Germ Buster Canvas)',
+        titleEnglish: 'Hand Hygiene Soap Scrub Simulator',
+        grade: 1,
+        subject: 'science',
+        icon: '🧼',
+        promptText: 'អូសដុំសាប៊ូដុសលើបាតដៃដើម្បីកម្ចាត់មេរោគឲ្យស្អាតល្អ៖',
+        data: { mode: 'germ_buster' }
+      },
+      {
+        id: 'sandbox-sun-shadow',
+        engineType: 'sandbox',
+        titleKhmer: 'ស្រមោល និងពន្លឺព្រះអាទិត្យ (Sun & Shadow Dial)',
+        titleEnglish: 'Solar Angle & Pagoda Pillar Shadow Simulator',
+        grade: 3,
+        subject: 'science',
+        icon: '☀️',
+        promptText: 'រំកិលទីតាំងព្រះអាទិត្យនៅលើផ្ទៃមេឃដើម្បីសង្កេតប្រវែងស្រមោល៖',
+        data: { mode: 'sun_shadow' }
+      },
+      {
+        id: 'sandbox-magnetism',
+        engineType: 'sandbox',
+        titleKhmer: 'កម្លាំងស្រូបមេដែក (Magnetic Permeability Explorer)',
+        titleEnglish: 'Magnetic Attraction Laboratory',
+        grade: 3,
+        subject: 'science',
+        icon: '🧲',
+        promptText: 'អូសមេដែកលើតុដើម្បីស្រូបវត្ថុទាំងអស់ដែលធ្វើពីដែក៖',
+        data: { mode: 'magnetism' }
+      },
+
+      // ENGINE C: CRA Math Games
+      {
+        id: 'math-market-cashier',
+        engineType: 'math_cra',
+        titleKhmer: 'ផ្សារខ្មែរ (Cambodian Market Cashier)',
+        titleEnglish: 'Riel Currency Assembly & Cashier',
+        grade: 2,
+        subject: 'math',
+        icon: '🪙',
+        promptText: 'សូមចុចជ្រើសរើសក្រដាសប្រាក់រៀលដើម្បីទូទាត់ឲ្យបានគ្រប់ចំនួនទឹកប្រាក់ទំនិញ៖',
+        data: { mode: 'market_cashier', targetTotal: 3500 }
+      },
+      {
+        id: 'math-balance-scale',
+        engineType: 'math_cra',
+        titleKhmer: 'ជញ្ជីងសមីការ (Dual-Pan Balance Scale)',
+        titleEnglish: 'Interactive Equation Balance Scale',
+        grade: 2,
+        subject: 'math',
+        icon: '⚖️',
+        promptText: 'ដាក់ទម្ងន់ចូលក្នុងប្រអប់ទទេនៅលើជញ្ជីងខាងឆ្វេងដើម្បីឲ្យមានតុល្យភាពស្មើនឹងខាងស្តាំ៖',
+        data: { mode: 'balance_scale', leftKnown: 4, rightTarget: 9 }
+      },
+      {
+        id: 'math-frog-hopper',
+        engineType: 'math_cra',
+        titleKhmer: 'កង្កែបលោតបន្ទាត់ចំនួន (Number Line Hopper)',
+        titleEnglish: 'Number Line Frog Hopper (Addition)',
+        grade: 1,
+        subject: 'math',
+        icon: '🐸',
+        promptText: 'ចុចលោតទៅមុខ ឬថយក្រោយដើម្បីជួយកង្កែបទៅដល់ផលបូក ៦ + ៧ = ? ៖',
+        data: { mode: 'frog_hopper', startNum: 6, addNum: 7 }
+      },
+      {
+        id: 'math-fair-share',
+        engineType: 'math_cra',
+        titleKhmer: 'ចែកស្ករស្មើគ្នា (Fair-Share Physical Division)',
+        titleEnglish: 'Concrete Equal Distribution Division',
+        grade: 3,
+        subject: 'math',
+        icon: '🧺',
+        promptText: 'សូមចែកផ្លែឈើទាំង ១២ ផ្លែ ចូលទៅក្នុងកន្ត្រកទាំង ៣ ឲ្យបានស្មើៗគ្នា៖',
+        data: { mode: 'fair_share', totalItems: 12, basketsCount: 3 }
+      },
+
+      // ENGINE D: Khmer Phonetics & Syntax
+      {
+        id: 'phonetics-syllable-builder',
+        engineType: 'khmer_phonetics',
+        titleKhmer: 'រោងចក្រផ្គុំព្យាង្គ (Khmer Syllable Constructor)',
+        titleEnglish: 'Base + Subscript + Vowel Word Forge',
+        grade: 1,
+        subject: 'khmer',
+        icon: '🏗️',
+        promptText: 'ផ្គុំព្យញ្ជនៈដើម ជើងអក្សរ និងស្រៈ ដើម្បីបង្កើតពាក្យ «ក្ងា» (ក + ្ង + ា)៖',
+        data: { mode: 'syllable_constructor', targetWord: 'ក្ងា', base: 'ក', sub: '្ង', vowel: 'ា' }
+      },
+      {
+        id: 'phonetics-svo-rail',
+        engineType: 'khmer_phonetics',
+        titleKhmer: 'តម្រៀបល្បះរូបភាព (SVO Syntax Rail)',
+        titleEnglish: 'Subject-Verb-Object Railroad Track',
+        grade: 2,
+        subject: 'khmer',
+        icon: '🚂',
+        promptText: 'ចុចជ្រើសរើសពាក្យ រួចចុចដាក់ចូលទូរថភ្លើងតាមលំដាប់ ប្រធាន + កិរិយា + កម្មបទ៖',
+        data: { mode: 'svo_rail' }
+      },
+      {
+        id: 'phonetics-silent-marker',
+        engineType: 'khmer_phonetics',
+        titleKhmer: 'អ្នកស៊ើបអង្កេតទណ្ឌឃាត (Silent Consonant Inspector)',
+        titleEnglish: 'Loanword Silent Diacritic Inspector',
+        grade: 3,
+        subject: 'khmer',
+        icon: '🔍',
+        promptText: 'រកមើលតួអក្សរដែលមិនបញ្ចេញសំឡេងក្នុងពាក្យ «សប្តាហ៍» រួចចុចដាក់សញ្ញាទណ្ឌឃាត (៍)៖',
+        data: { mode: 'silent_marker' }
+      },
+
+      // ENGINE E: Stage Sequencer
+      {
+        id: 'seq-butterfly-lifecycle',
+        engineType: 'sequencer',
+        titleKhmer: 'វដ្តជីវិតមេអំបៅ (Butterfly Metamorphosis)',
+        titleEnglish: '4-Stage Biological Butterfly Life Cycle',
+        grade: 2,
+        subject: 'science',
+        icon: '🦋',
+        promptText: 'ចុចជ្រើសរើសកាត រួចចុចដាក់ចូលប្រអប់តាមលំដាប់លូតលាស់ពីពងរហូតដល់មេអំបៅ៖',
+        data: {
+          mode: 'life_cycle',
+          cycleTitleKhmer: 'វដ្តជីវិតមេអំបៅ (Butterfly Life Cycle)',
+          stages: [
+            { id: 's-1', stepNumber: 1, titleKhmer: 'ពង', descriptionKhmer: 'ពងតូចៗលើស្លឹកឈើ', icon: '🥚' },
+            { id: 's-2', stepNumber: 2, titleKhmer: 'ដង្កូវ', descriptionKhmer: 'ដង្កូវញាស់ស៊ីស្លឹកឈើ', icon: '🐛' },
+            { id: 's-3', stepNumber: 3, titleKhmer: 'ដឹកឌឿ', descriptionKhmer: 'សម្ងំក្នុងសំបុកដុក', icon: '🥜' },
+            { id: 's-4', stepNumber: 4, titleKhmer: 'មេអំបៅ', descriptionKhmer: 'ហោះហើរស្រស់ស្អាត', icon: '🦋' },
+          ]
+        }
+      },
+      {
+        id: 'seq-water-cycle',
+        engineType: 'sequencer',
+        titleKhmer: 'វដ្តនៃទឹកធម្មជាតិ (Atmospheric Water Cycle)',
+        titleEnglish: 'Natural Water Cycle Steps',
+        grade: 3,
+        subject: 'science',
+        icon: '💧',
+        promptText: 'តម្រៀបដំណាក់កាលនៃវដ្តទឹក៖ រំហួត ➔ កំណក ➔ ទឹកភ្លៀង ➔ ការប្រមូលផ្តុំ៖',
+        data: {
+          mode: 'water_cycle',
+          cycleTitleKhmer: 'វដ្តនៃទឹកធម្មជាតិ (Water Cycle)',
+          stages: [
+            { id: 'w-1', stepNumber: 1, titleKhmer: 'រំហួត', descriptionKhmer: 'កម្ដៅថ្ងៃបំភាយទឹកទៅជាចំហាយ', icon: '☀️' },
+            { id: 'w-2', stepNumber: 2, titleKhmer: 'កំណក', descriptionKhmer: 'ចំហាយទឹកផ្តុំគ្នាជាពពក', icon: '☁️' },
+            { id: 'w-3', stepNumber: 3, titleKhmer: 'ទឹកភ្លៀង', descriptionKhmer: 'ពពកធ្លាក់មកជាដំណក់ទឹកភ្លៀង', icon: '🌧️' },
+            { id: 'w-4', stepNumber: 4, titleKhmer: 'ការប្រមូលផ្តុំ', descriptionKhmer: 'ទឹកហូរប្រមូលផ្តុំក្នុងទន្លេនិងសមុទ្រ', icon: '🌊' },
+          ]
+        }
+      },
+      {
+        id: 'seq-comic-strip',
+        engineType: 'sequencer',
+        titleKhmer: 'រឿងរូបភាព ៣ វគ្គ (3-Panel Narrative Comic)',
+        titleEnglish: 'Story Sequence Comic Strip',
+        grade: 1,
+        subject: 'khmer',
+        icon: '🖼️',
+        promptText: 'តម្រៀបដំណើររឿង ៣ វគ្គ៖ ដាំគ្រាប់ពូជ ➔ ស្រោចទឹក ➔ ទទួលផលផ្លែឈើ៖',
+        data: {
+          mode: 'comic_strip',
+          cycleTitleKhmer: 'ការដាំដើមស្វាយ (Planting Mango Tree)',
+          stages: [
+            { id: 'c-1', stepNumber: 1, titleKhmer: 'ដាំគ្រាប់ពូជ', descriptionKhmer: 'ជីកដីដាក់គ្រាប់ក្នុងដី', icon: '🌱' },
+            { id: 'c-2', stepNumber: 2, titleKhmer: 'ស្រោចទឹកថែទាំ', descriptionKhmer: 'ស្រោចទឹកជារៀងរាល់ព្រឹក', icon: '🚿' },
+            { id: 'c-3', stepNumber: 3, titleKhmer: 'បេះផ្លែស្វាយ', descriptionKhmer: 'ដើមស្វាយផ្លែទុំផ្អែមឆ្ងាញ់', icon: '🥭' },
+          ]
+        }
+      }
+    ];
+
+    // =========================================================================
+    // ENGINE A: SPATIAL & ATTRIBUTE SORTER (Tap-to-Select -> Tap-to-Place)
+    // =========================================================================
+    const SorterEngine = memo(({ game, onComplete }) => {
+      const sorterData = game.data || {};
+      const bins = sorterData.bins || [];
+      const initialEntities = sorterData.entities || [];
+
+      const [remainingEntities, setRemainingEntities] = useState([]);
+      const [selectedEntityId, setSelectedEntityId] = useState(null);
+      const [bouncedEntityId, setBouncedEntityId] = useState(null);
+      const [sortedCounts, setSortedCounts] = useState({});
+
+      useEffect(() => {
+        const shuffled = [...initialEntities].sort(() => Math.random() - 0.5);
+        setRemainingEntities(shuffled);
+        setSelectedEntityId(shuffled[0]?.id || null);
+        const counts = {};
+        bins.forEach(b => { counts[b.id] = 0; });
+        setSortedCounts(counts);
+      }, [game]);
+
+      const activeEntity = remainingEntities.find(e => e.id === selectedEntityId) || remainingEntities[0] || null;
+
+      const handleSelectEntity = (entity) => {
+        SoundBus.playPop();
+        setSelectedEntityId(entity.id);
+      };
+
+      const handlePlaceIntoBin = (bin) => {
+        if (!activeEntity) return;
+
+        if (activeEntity.correctBinId === bin.id) {
+          SoundBus.playSnap();
+          SoundBus.playCoin();
+          setSortedCounts(prev => ({
+            ...prev,
+            [bin.id]: (prev[bin.id] || 0) + 1
+          }));
+
+          const nextRemaining = remainingEntities.filter(e => e.id !== activeEntity.id);
+          setRemainingEntities(nextRemaining);
+          setSelectedEntityId(nextRemaining[0]?.id || null);
+
+          if (nextRemaining.length === 0) {
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setTimeout(() => onComplete(120), 1300);
+          }
+        } else {
+          SoundBus.playGentleError();
+          setBouncedEntityId(activeEntity.id);
+          setTimeout(() => setBouncedEntityId(null), 600);
+        }
+      };
+
+      return (
+        <div className="space-y-6 animate-pop-in">
+          {/* Active Item Showcase Card */}
+          <div className="bg-gradient-to-b from-amber-50/80 to-amber-100/40 rounded-3xl p-6 sm:p-8 border-4 border-amber-300 shadow-sm flex flex-col items-center justify-center min-h-[200px] text-center">
+            {activeEntity ? (
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  onClick={() => handleSelectEntity(activeEntity)}
+                  className={`transition-all duration-200 flex flex-col items-center gap-2 select-none overflow-visible py-3 px-8 rounded-3xl cursor-pointer ${
+                    bouncedEntityId === activeEntity.id
+                      ? 'animate-shake ring-4 ring-rose-400 bg-rose-50'
+                      : 'ring-4 ring-indigo-500 scale-105 shadow-xl bg-white border-2 border-indigo-400'
+                  }`}
+                >
+                  <span className="text-7xl drop-shadow-sm">{activeEntity.icon}</span>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-2xl font-black text-slate-900 font-kantumruy leading-relaxed overflow-visible py-1">
+                      {activeEntity.nameKhmer}
+                    </h4>
+                    <SpeakerButton text={activeEntity.nameKhmer} size="xs" />
+                  </div>
+                </div>
+
+                <div className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-900 px-4 py-1.5 rounded-full text-xs font-bold font-kantumruy border border-indigo-200 mt-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-indigo-500 animate-ping mr-1" />
+                  <span>👆 បានជ្រើសរើស! សូមចុចលើប្រអប់/ធុងខាងក្រោម (Tap Destination Bin)</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-2">
+                <span className="text-5xl block animate-bounce">🎉</span>
+                <h4 className="text-xl font-black text-emerald-900 font-kantumruy leading-relaxed">
+                  បានចាត់ថ្នាក់វត្ថុទាំងអស់ជោគជ័យ!
+                </h4>
+              </div>
+            )}
+          </div>
+
+          {/* Destination Target Bins */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {bins.map(bin => {
+              const count = sortedCounts[bin.id] || 0;
+              return (
+                <button
+                  key={bin.id}
+                  onClick={() => handlePlaceIntoBin(bin)}
+                  disabled={!activeEntity}
+                  className={`p-5 rounded-3xl text-white font-extrabold shadow-md btn-kid border-b-6 flex flex-col items-center justify-center gap-2 transition-transform active:scale-95 bg-gradient-to-b ${bin.colorClass} border-black/20 hover:scale-104 overflow-visible py-3 cursor-pointer`}
+                >
+                  <span className="text-4xl">{bin.icon}</span>
+                  <h5 className="font-kantumruy font-black text-sm text-center leading-relaxed overflow-visible py-1">
+                    {bin.nameKhmer}
+                  </h5>
+                  <span className="text-xs font-mono font-bold bg-white/25 px-3 py-0.5 rounded-full mt-1">
+                    ប្រមូលបាន: {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bottom Remaining Entity Counter Bar */}
+          <div className="flex items-center justify-between bg-white px-5 py-3 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-700">
+            <span>នៅសល់៖ <strong className="text-amber-600 text-sm font-mono">{remainingEntities.length}</strong> វត្ថុ</span>
+            <span>ចុចលើរូបដើម្បីស្ដាប់បញ្ចេញសំឡេង 🔊</span>
+          </div>
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // ENGINE B: ENVIRONMENTAL STATE-MACHINE SANDBOX
+    // =========================================================================
+    const SandboxEngine = memo(({ game, onComplete }) => {
+      const mode = game.data?.mode || 'germination';
+
+      // 1. Plant Germination State
+      const [moisture, setMoisture] = useState(40);
+      const [sunlight, setSunlight] = useState(35);
+      const isThriving = moisture >= 55 && moisture <= 85 && sunlight >= 50 && sunlight <= 85;
+
+      useEffect(() => {
+        if (mode === 'germination' && isThriving) {
+          const t = setTimeout(() => {
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            onComplete(120);
+          }, 1600);
+          return () => clearTimeout(t);
+        }
+      }, [mode, isThriving, onComplete]);
+
+      // 2. Germ Buster Hand Wash State
+      const [germs, setGerms] = useState([
+        { id: 1, x: 30, y: 35, health: 100 },
+        { id: 2, x: 65, y: 30, health: 100 },
+        { id: 3, x: 45, y: 55, health: 100 },
+        { id: 4, x: 25, y: 65, health: 100 },
+        { id: 5, x: 70, y: 70, health: 100 },
+      ]);
+      const [soapPos, setSoapPos] = useState({ x: 50, y: 50 });
+      const remainingGerms = germs.filter(g => g.health > 0).length;
+
+      const handleScrub = (clientX, clientY, currentTarget) => {
+        const rect = currentTarget.getBoundingClientRect();
+        const xPct = Math.max(5, Math.min(95, ((clientX - rect.left) / rect.width) * 100));
+        const yPct = Math.max(5, Math.min(95, ((clientY - rect.top) / rect.height) * 100));
+        setSoapPos({ x: xPct, y: yPct });
+        SoundBus.playSoap();
+
+        setGerms(prev => prev.map(g => {
+          const dist = Math.hypot(xPct - g.x, yPct - g.y);
+          if (dist < 22 && g.health > 0) {
+            return { ...g, health: Math.max(0, g.health - 25) };
+          }
+          return g;
+        }));
+      };
+
+      useEffect(() => {
+        if (mode === 'germ_buster' && remainingGerms === 0) {
+          SoundBus.playSuccess();
+          SoundBus.playStar();
+          const t = setTimeout(() => onComplete(120), 1200);
+          return () => clearTimeout(t);
+        }
+      }, [mode, remainingGerms, onComplete]);
+
+      // 3. Sun & Shadow Dial State
+      const [sunAngle, setSunAngle] = useState(45); // 15 to 165
+      const rad = (sunAngle * Math.PI) / 180;
+      const shadowLength = Math.max(15, Math.min(180, Math.abs(100 / Math.tan(rad))));
+      const shadowDirection = sunAngle < 90 ? 1 : -1;
+
+      // 4. Magnetism Explorer State
+      const [magnetPos, setMagnetPos] = useState({ x: 120, y: 80 });
+      const [magnetItems, setMagnetItems] = useState([
+        { id: 1, name: 'ដែកគោល', icon: '🔩', isMagnetic: true, caught: false, x: 60, y: 150 },
+        { id: 2, name: 'កូនឃ្នៀបក្រដាស', icon: '📎', isMagnetic: true, caught: false, x: 150, y: 190 },
+        { id: 3, name: 'បន្ទាត់ជ័រ', icon: '📏', isMagnetic: false, caught: false, x: 230, y: 140 },
+        { id: 4, name: 'ប៊ូតុងឈើ', icon: '🪵', isMagnetic: false, caught: false, x: 80, y: 220 },
+        { id: 5, name: 'សោដែក', icon: '🔑', isMagnetic: true, caught: false, x: 200, y: 210 },
+      ]);
+      const caughtCount = magnetItems.filter(m => m.isMagnetic && m.caught).length;
+      const totalMagnetic = magnetItems.filter(m => m.isMagnetic).length;
+
+      const handleMoveMagnet = (clientX, clientY, currentTarget) => {
+        const rect = currentTarget.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        setMagnetPos({ x, y });
+
+        setMagnetItems(prev => prev.map(item => {
+          if (!item.isMagnetic) return item;
+          const dist = Math.hypot(x - item.x, y - item.y);
+          if (dist < 65 && !item.caught) {
+            SoundBus.playMagnet();
+            return { ...item, caught: true, x: x + 15, y: y + 20 };
+          }
+          if (item.caught) {
+            return { ...item, x: x + 15, y: y + 20 };
+          }
+          return item;
+        }));
+      };
+
+      useEffect(() => {
+        if (mode === 'magnetism' && caughtCount === totalMagnetic && totalMagnetic > 0) {
+          SoundBus.playSuccess();
+          SoundBus.playStar();
+          const t = setTimeout(() => onComplete(120), 1400);
+          return () => clearTimeout(t);
+        }
+      }, [mode, caughtCount, totalMagnetic, onComplete]);
+
+      return (
+        <div className="space-y-6 animate-pop-in">
+          {/* 1. GERMINATION LAB */}
+          {mode === 'germination' && (
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="md:col-span-7 bg-gradient-to-b from-sky-100 via-amber-50 to-amber-900/20 rounded-3xl p-6 border-4 border-emerald-300 shadow-md min-h-[300px] flex flex-col items-center justify-between relative overflow-hidden">
+                <div className="text-8xl mt-10 transition-all duration-500 transform">
+                  {!isThriving && moisture < 30 && '🌰'}
+                  {!isThriving && moisture >= 30 && moisture < 50 && '🌱'}
+                  {!isThriving && moisture >= 50 && '🌿'}
+                  {isThriving && '🌻'}
+                </div>
+                <div className="bg-white/95 px-5 py-2 rounded-2xl border-2 border-emerald-300 text-xs font-bold font-kantumruy shadow-xs mt-4">
+                  {isThriving ? '✨ លក្ខខណ្ឌល្អឥតខ្ចោះ! រុក្ខជាតិចេញផ្កាស្រស់ស្អាត!' : '💧 រក្សាតុល្យភាពទឹក និងពន្លឺថ្ងៃ ឲ្យស្ថិតក្នុងចន្លោះ ៥៥ - ៨៥'}
+                </div>
+              </div>
+
+              <div className="md:col-span-5 bg-white p-6 rounded-3xl border-3 border-emerald-200 shadow-sm space-y-5 font-kantumruy">
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-sky-800 mb-1">
+                    <span>💧 កម្រិតជាតិសំណើម (Moisture):</span>
+                    <span className="font-mono text-sm">{moisture}%</span>
+                  </div>
+                  <input
+                    type="range" min="10" max="100" value={moisture}
+                    onChange={e => { SoundBus.playPop(); setMoisture(Number(e.target.value)); }}
+                    className="w-full h-3 bg-sky-100 rounded-lg cursor-pointer accent-sky-500"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-amber-800 mb-1">
+                    <span>☀️ កម្រិតពន្លឺព្រះអាទិត្យ (Sunlight):</span>
+                    <span className="font-mono text-sm">{sunlight}%</span>
+                  </div>
+                  <input
+                    type="range" min="10" max="100" value={sunlight}
+                    onChange={e => { SoundBus.playPop(); setSunlight(Number(e.target.value)); }}
+                    className="w-full h-3 bg-amber-100 rounded-lg cursor-pointer accent-amber-500"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2. GERM BUSTER CANVAS */}
+          {mode === 'germ_buster' && (
+            <div className="space-y-4 font-kantumruy">
+              <div
+                onMouseMove={e => handleScrub(e.clientX, e.clientY, e.currentTarget)}
+                onTouchMove={e => {
+                  const touch = e.touches[0];
+                  if (touch) handleScrub(touch.clientX, touch.clientY, e.currentTarget);
+                }}
+                className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-3xl p-6 border-4 border-sky-300 shadow-inner relative min-h-[320px] overflow-hidden cursor-crosshair select-none flex items-center justify-center"
+              >
+                <div className="text-9xl opacity-20 pointer-events-none select-none">🖐️</div>
+
+                {germs.map(g => (
+                  <div
+                    key={g.id}
+                    className="absolute flex flex-col items-center pointer-events-none transition-opacity duration-200"
+                    style={{ left: `${g.x}%`, top: `${g.y}%`, opacity: g.health / 100, transform: 'translate(-50%, -50%)' }}
+                  >
+                    <span className="text-4xl animate-pulse">🦠</span>
+                    <span className="text-[10px] font-bold bg-white/90 px-1 rounded shadow-xs text-rose-700 font-mono">
+                      {g.health}%
+                    </span>
+                  </div>
+                ))}
+
+                <div
+                  className="absolute pointer-events-none text-5xl z-20 transition-all duration-75"
+                  style={{ left: `${soapPos.x}%`, top: `${soapPos.y}%`, transform: 'translate(-50%, -50%)' }}
+                >
+                  🧼
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border-2 border-sky-200 flex justify-between text-xs font-bold text-slate-700">
+                <span>🧼 អូសដុំសាប៊ូដុសលើបាតដៃដើម្បីកម្ចាត់មេរោគ</span>
+                <span className="text-sky-700 font-mono text-sm">នៅសល់: {remainingGerms}</span>
+              </div>
+            </div>
+          )}
+
+          {/* 3. SUN & SHADOW DIAL */}
+          {mode === 'sun_shadow' && (
+            <div className="space-y-4 font-kantumruy">
+              <div className="bg-gradient-to-b from-sky-100 to-amber-50 rounded-3xl p-8 border-4 border-amber-300 shadow-inner min-h-[280px] relative flex flex-col justify-end items-center overflow-hidden">
+                {/* Sun Vector */}
+                <div
+                  className="absolute text-5xl transition-all duration-150"
+                  style={{
+                    left: `${(sunAngle / 180) * 80 + 10}%`,
+                    top: `${15 + Math.sin(rad) * -10}%`,
+                  }}
+                >
+                  ☀️
+                </div>
+
+                {/* Pagoda Pillar Object */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-8 h-28 bg-amber-800 rounded-t-lg shadow-md border border-amber-950 flex items-center justify-center text-white text-xs font-bold">
+                    🏛️
+                  </div>
+                  <div className="w-16 h-3 bg-amber-950 rounded-full" />
+                </div>
+
+                {/* Dynamic Cast Shadow */}
+                <div
+                  className="absolute bottom-6 bg-slate-900/40 rounded-full blur-[2px] transition-all duration-100"
+                  style={{
+                    width: `${shadowLength}px`,
+                    height: '14px',
+                    left: shadowDirection > 0 ? '50%' : `calc(50% - ${shadowLength}px)`,
+                    transform: `skewX(${shadowDirection * 25}deg)`,
+                  }}
+                />
+              </div>
+
+              <div className="bg-white p-5 rounded-3xl border-3 border-amber-200 space-y-2">
+                <div className="flex justify-between text-xs font-bold text-slate-700">
+                  <span>📐 មុំនៃព្រះអាទិត្យ (Solar Arc Angle):</span>
+                  <span className="font-mono text-sm text-amber-700">{sunAngle}°</span>
+                </div>
+                <input
+                  type="range" min="15" max="165" value={sunAngle}
+                  onChange={e => { SoundBus.playPop(); setSunAngle(Number(e.target.value)); }}
+                  className="w-full h-3 bg-amber-100 rounded-lg cursor-pointer accent-amber-500"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 4. MAGNETISM LABORATORY */}
+          {mode === 'magnetism' && (
+            <div className="space-y-4 font-kantumruy">
+              <div
+                onMouseMove={e => handleMoveMagnet(e.clientX, e.clientY, e.currentTarget)}
+                onTouchMove={e => {
+                  const touch = e.touches[0];
+                  if (touch) handleMoveMagnet(touch.clientX, touch.clientY, e.currentTarget);
+                }}
+                className="bg-slate-50 rounded-3xl p-6 border-4 border-rose-300 shadow-inner relative min-h-[300px] overflow-hidden cursor-crosshair select-none"
+              >
+                <div
+                  className="absolute w-16 h-16 pointer-events-none transition-transform duration-75 z-20 flex items-center justify-center text-4xl drop-shadow-lg"
+                  style={{ left: `${magnetPos.x - 28}px`, top: `${magnetPos.y - 28}px` }}
+                >
+                  🧲
+                </div>
+
+                {magnetItems.map(item => (
+                  <div
+                    key={item.id}
+                    className={`absolute p-2 rounded-xl border flex items-center gap-1 font-kantumruy text-xs font-bold ${
+                      item.caught ? 'bg-rose-100 border-rose-400 text-rose-950 scale-110 shadow-md' : 'bg-white border-slate-200 text-slate-700'
+                    }`}
+                    style={{ left: `${item.x}px`, top: `${item.y}px` }}
+                  >
+                    <span className="text-2xl">{item.icon}</span>
+                    <span>{item.name}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border-2 border-rose-200 flex justify-between text-xs font-bold text-slate-700">
+                <span>🧲 អូសមេដែកកាត់លើតុដើម្បីស្រូបវត្ថុធ្វើពីដែក</span>
+                <span className="text-rose-700 font-mono text-sm">ស្រូបបាន: {caughtCount}/{totalMagnetic}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // ENGINE C: CONCRETE-REPRESENTATIONAL-ABSTRACT MATH LAB (CRA)
+    // =========================================================================
+    const MathCraEngine = memo(({ game, onComplete }) => {
+      const mode = game.data?.mode || 'market_cashier';
+
+      // --- Mode 1: Cambodian Market Cashier ---
+      const MarketCashier = () => {
+        const targetTotal = game.data?.targetTotal || 3500;
+        const [paidNotes, setPaidNotes] = useState([]);
+        const [isSuccess, setIsSuccess] = useState(false);
+        const [feedbackMsg, setFeedbackMsg] = useState('');
+
+        const banknotes = [
+          { val: 100, label: '១០០៛', color: 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100', icon: '💵' },
+          { val: 500, label: '៥០០៛', color: 'bg-rose-50 border-rose-300 text-rose-900 hover:bg-rose-100', icon: '💵' },
+          { val: 1000, label: '១,០០០៛', color: 'bg-sky-50 border-sky-300 text-sky-900 hover:bg-sky-100', icon: '💴' },
+          { val: 2000, label: '២,០០០៛', color: 'bg-yellow-50 border-yellow-300 text-yellow-900 hover:bg-yellow-100', icon: '💴' },
+          { val: 5000, label: '៥,០០០៛', color: 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100', icon: '💶' },
+          { val: 10000, label: '១០,០០០៛', color: 'bg-indigo-50 border-indigo-300 text-indigo-900 hover:bg-indigo-100', icon: '💷' },
+        ];
+
+        const currentPaidSum = paidNotes.reduce((sum, n) => sum + n.val, 0);
+
+        const handleAddNote = (note) => {
+          if (isSuccess) return;
+          SoundBus.playCoin();
+          setPaidNotes(prev => [...prev, { ...note, uniqueId: Math.random() }]);
+          setFeedbackMsg('');
+        };
+
+        const handleRemoveNote = (uniqueId) => {
+          if (isSuccess) return;
+          SoundBus.playPop();
+          setPaidNotes(prev => prev.filter(n => n.uniqueId !== uniqueId));
+          setFeedbackMsg('');
+        };
+
+        const handleReset = () => {
+          SoundBus.playPop();
+          setPaidNotes([]);
+          setFeedbackMsg('');
+        };
+
+        const handleVerifyPayment = () => {
+          if (currentPaidSum === targetTotal) {
+            SoundBus.playCashDrawer();
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setIsSuccess(true);
+            setFeedbackMsg('🎉 ត្រឹមត្រូវល្អណាស់! អ្នកបានទូទាត់ប្រាក់គ្រប់ចំនួន!');
+            setTimeout(() => onComplete(100), 1400);
+          } else if (currentPaidSum < targetTotal) {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ ខ្វះប្រាក់ ' + toKhmerNumeral(targetTotal - currentPaidSum) + '៛ ទៀត! សូមថែមក្រដាសប្រាក់');
+          } else {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ លើសប្រាក់ ' + toKhmerNumeral(currentPaidSum - targetTotal) + '៛! សូមដកក្រដាសប្រាក់ចេញខ្លះ');
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* Target Display Shelf */}
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 p-5 rounded-3xl text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-4xl shadow-inner backdrop-blur-sm">
+                  🧺
+                </div>
+                <div>
+                  <div className="text-amber-100 text-xs font-bold uppercase tracking-wider font-fredoka">Cambodian Fresh Market</div>
+                  <div className="text-xl font-black font-kantumruy">ទំនិញ៖ ផ្លែចេកទុំ ១ស្និត</div>
+                </div>
+              </div>
+
+              <div className="bg-white/20 px-6 py-3 rounded-2xl border border-white/30 backdrop-blur-sm text-center">
+                <div className="text-xs text-amber-100 font-bold font-kantumruy">តម្លៃត្រូវទូទាត់សរុប</div>
+                <div className="text-3xl font-black font-kantumruy tracking-tight">
+                  {toKhmerNumeral(targetTotal)} <span className="text-2xl font-bold font-kantumruy">៛</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Counter Tray */}
+            <div className="bg-white p-6 rounded-3xl border-2 border-slate-200/80 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🪙</span>
+                  <h3 className="font-kantumruy font-bold text-slate-800 text-lg">ថាសប្រាក់បានបង់ (ចុចលើក្រដាសដើម្បីដកចេញ)</h3>
+                </div>
+                <div className="font-kantumruy text-sm font-bold text-slate-600">
+                  សរុបបានបង់: <span className={'text-lg font-black font-mono ' + (currentPaidSum === targetTotal ? 'text-emerald-600' : 'text-amber-600')}>
+                    {toKhmerNumeral(currentPaidSum)}៛
+                  </span>
+                </div>
+              </div>
+
+              <div className="min-h-[120px] bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-center">
+                {paidNotes.length === 0 ? (
+                  <div className="text-slate-400 font-kantumruy text-sm italic">
+                    ថាសប្រាក់នៅទទេ! សូមចុចជ្រើសរើសក្រដាសប្រាក់ខាងក្រោមដើម្បីដាក់បង់...
+                  </div>
+                ) : (
+                  paidNotes.map(note => (
+                    <button
+                      key={note.uniqueId}
+                      onClick={() => handleRemoveNote(note.uniqueId)}
+                      className={'px-4 py-2.5 rounded-xl border-2 font-kantumruy font-black text-sm shadow-sm transition-transform active:scale-95 flex items-center gap-1.5 ' + note.color}
+                    >
+                      <span>{note.icon}</span>
+                      <span>{note.label}</span>
+                      <span className="text-rose-500 font-bold ml-1 text-xs">✕</span>
+                    </button>
+                  ))
+                )}
+              </div>
+
+              {feedbackMsg && (
+                <div className={'mt-3 p-3 rounded-xl font-kantumruy text-sm font-bold text-center ' + (
+                  isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-amber-50 text-amber-800 border border-amber-300'
+                )}>
+                  {feedbackMsg}
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={handleReset}
+                  className="px-5 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-kantumruy font-bold hover:bg-slate-100 transition-colors"
+                >
+                  សម្អាតថាស
+                </button>
+                <button
+                  onClick={handleVerifyPayment}
+                  disabled={isSuccess || paidNotes.length === 0}
+                  className={'flex-1 py-3 rounded-2xl font-kantumruy font-black text-base text-white shadow-md transition-all flex items-center justify-center gap-2 ' + (
+                    isSuccess || paidNotes.length === 0
+                      ? 'bg-slate-300 cursor-not-allowed'
+                      : 'bg-emerald-600 hover:bg-emerald-700 active:scale-98 shadow-emerald-200'
+                  )}
+                >
+                  <IconCheck className="w-5 h-5" />
+                  <span>ទូទាត់ប្រាក់ (Verify Cash)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Banknotes Selection Deck */}
+            <div className="bg-slate-100/80 p-6 rounded-3xl border-2 border-slate-200/80">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-3">
+                កាបូបក្រដាសប្រាក់រៀល (Tap Banknote to Pay)
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                {banknotes.map(note => (
+                  <button
+                    key={note.val}
+                    onClick={() => handleAddNote(note)}
+                    disabled={isSuccess}
+                    className={'p-4 rounded-2xl border-2 font-kantumruy font-black text-base shadow-sm transition-all hover:scale-105 active:scale-95 flex flex-col items-center gap-1 ' + note.color}
+                  >
+                    <span className="text-3xl">{note.icon}</span>
+                    <span>{note.label}</span>
+                    <span className="text-xs font-mono opacity-60 font-normal">+{note.val}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // --- Mode 2: Dual-Pan Balance Scale ---
+      const BalanceScale = () => {
+        const leftKnown = game.data?.leftKnown || 4;
+        const rightTarget = game.data?.rightTarget || 9;
+        const [leftAdded, setLeftAdded] = useState([]);
+        const [isSuccess, setIsSuccess] = useState(false);
+        const [feedbackMsg, setFeedbackMsg] = useState('');
+
+        const weightsBank = [1, 2, 3, 5];
+
+        const leftTotal = leftKnown + leftAdded.reduce((sum, w) => sum + w.val, 0);
+        const diff = leftTotal - rightTarget;
+        const tiltDeg = Math.max(-14, Math.min(14, diff * 3.5));
+
+        const handleAddWeight = (val) => {
+          if (isSuccess) return;
+          SoundBus.playSnap();
+          setLeftAdded(prev => [...prev, { val, id: Math.random() }]);
+          setFeedbackMsg('');
+        };
+
+        const handleRemoveWeight = (id) => {
+          if (isSuccess) return;
+          SoundBus.playPop();
+          setLeftAdded(prev => prev.filter(w => w.id !== id));
+          setFeedbackMsg('');
+        };
+
+        const handleVerify = () => {
+          if (leftTotal === rightTarget) {
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setIsSuccess(true);
+            setFeedbackMsg('🎉 តុល្យភាពស្មើគ្នា! ជញ្ជីងមានលំនឹងត្រឹមត្រូវ!');
+            setTimeout(() => onComplete(100), 1400);
+          } else if (leftTotal < rightTarget) {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ ជញ្ជីងខាងឆ្វេងស្រាលជាង! សូមថែមទម្ងន់ទៀត');
+          } else {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ ជញ្ជីងខាងឆ្វេងធ្ងន់ជាងហើយ! សូមដកទម្ងន់ចេញខ្លះ');
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* Equation HUD */}
+            <div className="bg-white p-5 rounded-3xl border-2 border-slate-200/80 shadow-sm flex items-center justify-center gap-3 text-2xl font-black font-kantumruy text-slate-800">
+              <span className="text-indigo-600 bg-indigo-50 px-4 py-2 rounded-2xl border border-indigo-200">{toKhmerNumeral(leftKnown)}</span>
+              <span>+</span>
+              <span className="text-amber-600 bg-amber-50 px-4 py-2 rounded-2xl border-2 border-dashed border-amber-300 min-w-[50px] text-center">
+                {leftAdded.length > 0 ? toKhmerNumeral(leftAdded.reduce((s, w) => s + w.val, 0)) : '?'}
+              </span>
+              <span>=</span>
+              <span className="text-emerald-600 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-200">{toKhmerNumeral(rightTarget)}</span>
+            </div>
+
+            {/* Interactive Scale Graphic */}
+            <div className="bg-gradient-to-b from-sky-50 to-slate-100 p-8 rounded-3xl border-2 border-slate-200 relative overflow-hidden min-h-[300px] flex flex-col items-center justify-between">
+              <div className="w-full max-w-md relative pt-6">
+                {/* Horizontal Beam */}
+                <div
+                  className="h-3 bg-slate-700 rounded-full w-full transition-transform duration-500 ease-out relative shadow-md"
+                  style={{ transform: 'rotate(' + tiltDeg + 'deg)' }}
+                >
+                  {/* Left Pan Attachment */}
+                  <div className="absolute left-4 -bottom-2 w-1 h-14 bg-slate-400">
+                    <div className="absolute -bottom-8 -left-12 w-28 h-12 bg-white/90 border-2 border-indigo-300 rounded-b-3xl shadow-md p-1 flex flex-wrap gap-1 items-center justify-center overflow-visible">
+                      <span className="bg-indigo-500 text-white font-bold text-xs px-1.5 py-0.5 rounded-md">{toKhmerNumeral(leftKnown)}</span>
+                      {leftAdded.map(w => (
+                        <span key={w.id} onClick={() => handleRemoveWeight(w.id)} className="bg-amber-500 text-white font-bold text-xs px-1.5 py-0.5 rounded-md cursor-pointer hover:bg-rose-500">
+                          {toKhmerNumeral(w.val)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right Pan Attachment */}
+                  <div className="absolute right-4 -bottom-2 w-1 h-14 bg-slate-400">
+                    <div className="absolute -bottom-8 -right-12 w-28 h-12 bg-white/90 border-2 border-emerald-300 rounded-b-3xl shadow-md p-1 flex items-center justify-center">
+                      <span className="bg-emerald-600 text-white font-black text-sm px-3 py-1 rounded-xl shadow-sm">
+                        {toKhmerNumeral(rightTarget)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fulcrum Stand */}
+                <div className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-b-[50px] border-b-slate-800 mx-auto -mt-1 shadow-lg" />
+                <div className="w-32 h-3 bg-slate-700 rounded-full mx-auto shadow-md" />
+              </div>
+
+              {/* Balance State Badge */}
+              <div className="mt-8 text-center font-kantumruy">
+                {leftTotal === rightTarget ? (
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-100 border border-emerald-300 text-emerald-800 px-4 py-1.5 rounded-full font-bold text-sm">
+                    ⚖️ មានតុល្យភាពស្មើគ្នា (Balanced)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 bg-slate-200 text-slate-700 px-4 py-1.5 rounded-full font-bold text-sm">
+                    {leftTotal > rightTarget ? 'ជញ្ជីងខាងឆ្វេងធ្ងន់ជាង ⬇️' : 'ជញ្ជីងខាងឆ្វេងស្រាលជាង ⬆️'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {feedbackMsg && (
+              <div className={'p-3 rounded-2xl font-kantumruy text-sm font-bold text-center ' + (
+                isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-amber-50 text-amber-800 border border-amber-300'
+              )}>
+                {feedbackMsg}
+              </div>
+            )}
+
+            {/* Weights Selector */}
+            <div className="bg-white p-5 rounded-3xl border-2 border-slate-200/80 shadow-sm">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-3">
+                ជ្រើសរើសទម្ងន់ដាក់ចូលជញ្ជីងខាងឆ្វេង (Tap Weight to Add)
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {weightsBank.map(val => (
+                  <button
+                    key={val}
+                    onClick={() => handleAddWeight(val)}
+                    disabled={isSuccess}
+                    className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 active:scale-95 text-amber-950 font-kantumruy font-black text-xl flex flex-col items-center gap-1 shadow-sm transition-transform"
+                  >
+                    <span className="text-2xl">⚖️</span>
+                    <span>+{toKhmerNumeral(val)}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => { SoundBus.playPop(); setLeftAdded([]); setFeedbackMsg(''); }}
+                  className="px-5 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-kantumruy font-bold hover:bg-slate-100"
+                >
+                  សម្អាត
+                </button>
+                <button
+                  onClick={handleVerify}
+                  disabled={isSuccess || leftAdded.length === 0}
+                  className={'flex-1 py-3 rounded-2xl font-kantumruy font-black text-base text-white shadow-md flex items-center justify-center gap-2 ' + (
+                    isSuccess || leftAdded.length === 0 ? 'bg-slate-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 active:scale-98'
+                  )}
+                >
+                  <IconCheck className="w-5 h-5" />
+                  <span>ផ្ទៀងផ្ទាត់តុល្យភាព (Verify)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // --- Mode 3: Frog Hopper on Number Line ---
+      const FrogHopper = () => {
+        const startNum = game.data?.startNum || 6;
+        const addNum = game.data?.addNum || 7;
+        const targetNum = startNum + addNum;
+        const [currentPos, setCurrentPos] = useState(startNum);
+        const [isSuccess, setIsSuccess] = useState(false);
+
+        const handleHop = (delta) => {
+          if (isSuccess) return;
+          const next = Math.max(0, Math.min(20, currentPos + delta));
+          setCurrentPos(next);
+          SoundBus.playPop();
+
+          if (next === targetNum) {
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setIsSuccess(true);
+            setTimeout(() => onComplete(100), 1400);
+          }
+        };
+
+        const handleReset = () => {
+          SoundBus.playPop();
+          setCurrentPos(startNum);
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* Target Equation Display */}
+            <div className="bg-emerald-500 p-5 rounded-3xl text-white shadow-md flex items-center justify-between">
+              <div>
+                <div className="text-emerald-100 text-xs font-bold uppercase tracking-wider font-fredoka">Number Line Hopper</div>
+                <div className="text-2xl font-black font-kantumruy">
+                  {toKhmerNumeral(startNum)} + {toKhmerNumeral(addNum)} = ?
+                </div>
+              </div>
+              <div className="bg-white/20 px-4 py-2 rounded-2xl font-kantumruy font-bold text-sm backdrop-blur-sm">
+                គោលដៅ៖ លោតឲ្យដល់ {toKhmerNumeral(targetNum)}
+              </div>
+            </div>
+
+            {/* Number Line Stage */}
+            <div className="bg-white p-8 rounded-3xl border-2 border-slate-200/80 shadow-sm relative overflow-x-auto min-h-[220px] flex flex-col justify-end">
+              {/* Frog Sprite */}
+              <div
+                className="absolute top-8 transition-all duration-300 ease-out flex flex-col items-center"
+                style={{
+                  left: 'calc(' + ((currentPos / 20) * 88) + '% + 16px)',
+                  transform: 'translateX(-50%)'
+                }}
+              >
+                <div className="text-4xl">🐸</div>
+                <div className="bg-indigo-600 text-white font-mono font-bold text-xs px-2 py-0.5 rounded-full shadow-sm">
+                  {toKhmerNumeral(currentPos)}
+                </div>
+              </div>
+
+              {/* The Line */}
+              <div className="relative w-full h-3 bg-slate-300 rounded-full flex justify-between items-center px-1">
+                {Array.from({ length: 21 }, (_, i) => (
+                  <div key={i} className="flex flex-col items-center relative -top-3">
+                    <div className={'w-1 ' + (i % 5 === 0 ? 'h-6 bg-slate-700' : 'h-3 bg-slate-400') + ' rounded-full'} />
+                    <span className={'font-kantumruy text-xs mt-1 ' + (i === targetNum ? 'text-emerald-600 font-black scale-125' : 'text-slate-500')}>
+                      {toKhmerNumeral(i)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Hop Controls */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button
+                onClick={() => handleHop(1)}
+                disabled={isSuccess || currentPos >= 20}
+                className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300 hover:bg-emerald-100 text-emerald-900 font-kantumruy font-black text-base active:scale-95 shadow-sm transition-transform"
+              >
+                លោតទៅមុខ +១
+              </button>
+              <button
+                onClick={() => handleHop(5)}
+                disabled={isSuccess || currentPos + 5 > 20}
+                className="p-4 rounded-2xl bg-teal-50 border-2 border-teal-300 hover:bg-teal-100 text-teal-900 font-kantumruy font-black text-base active:scale-95 shadow-sm transition-transform"
+              >
+                លោតទៅមុខ +៥
+              </button>
+              <button
+                onClick={() => handleHop(-1)}
+                disabled={isSuccess || currentPos <= 0}
+                className="p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 hover:bg-rose-100 text-rose-900 font-kantumruy font-black text-base active:scale-95 shadow-sm transition-transform"
+              >
+                ថយក្រោយ -១
+              </button>
+              <button
+                onClick={handleReset}
+                disabled={isSuccess}
+                className="p-4 rounded-2xl bg-slate-100 border-2 border-slate-300 hover:bg-slate-200 text-slate-700 font-kantumruy font-black text-base active:scale-95 shadow-sm transition-transform"
+              >
+                កំណត់ឡើងវិញ
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      // --- Mode 4: Fair-Share Physical Division ---
+      const FairShare = () => {
+        const totalItems = game.data?.totalItems || 12;
+        const basketsCount = game.data?.basketsCount || 3;
+        const targetPerBasket = Math.floor(totalItems / basketsCount);
+
+        const [unassignedCount, setUnassignedCount] = useState(totalItems);
+        const [baskets, setBaskets] = useState(() => Array(basketsCount).fill(0));
+        const [isSuccess, setIsSuccess] = useState(false);
+        const [feedbackMsg, setFeedbackMsg] = useState('');
+
+        const handleAddToBasket = (basketIdx) => {
+          if (isSuccess || unassignedCount <= 0) return;
+          SoundBus.playSnap();
+          setUnassignedCount(prev => prev - 1);
+          setBaskets(prev => {
+            const next = [...prev];
+            next[basketIdx] += 1;
+            return next;
+          });
+          setFeedbackMsg('');
+        };
+
+        const handleRemoveFromBasket = (basketIdx) => {
+          if (isSuccess || baskets[basketIdx] <= 0) return;
+          SoundBus.playPop();
+          setUnassignedCount(prev => prev + 1);
+          setBaskets(prev => {
+            const next = [...prev];
+            next[basketIdx] -= 1;
+            return next;
+          });
+          setFeedbackMsg('');
+        };
+
+        const handleVerify = () => {
+          const isAllAssigned = unassignedCount === 0;
+          const isAllEqual = baskets.every(count => count === targetPerBasket);
+
+          if (isAllAssigned && isAllEqual) {
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setIsSuccess(true);
+            setFeedbackMsg('🎉 ចែកស្មើគ្នាបានល្អណាស់! ក្នុងមួយកន្ត្រកមាន ' + toKhmerNumeral(targetPerBasket) + ' ផ្លែ!');
+            setTimeout(() => onComplete(100), 1400);
+          } else if (!isAllAssigned) {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ នៅសល់ផ្លែឈើ ' + toKhmerNumeral(unassignedCount) + ' ផ្លែទៀតមិនទាន់បានចែក!');
+          } else {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ ចំនួនផ្លែឈើក្នុងកន្ត្រកមិនទាន់ស្មើគ្នាទេ! សូមពិនិត្យឡើងវិញ');
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* Unassigned Fruit Pile */}
+            <div className="bg-white p-6 rounded-3xl border-2 border-slate-200/80 shadow-sm text-center">
+              <div className="flex items-center justify-between mb-3">
+                <div className="font-kantumruy font-bold text-slate-800 text-base">
+                  ផ្លែឈើនៅសល់ (Unassigned Mangoes)
+                </div>
+                <div className="font-kantumruy font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 text-sm">
+                  នៅសល់៖ {toKhmerNumeral(unassignedCount)} / {toKhmerNumeral(totalItems)}
+                </div>
+              </div>
+
+              <div className="min-h-[70px] bg-amber-50/50 rounded-2xl border-2 border-dashed border-amber-200 p-4 flex flex-wrap gap-2 items-center justify-center">
+                {Array.from({ length: unassignedCount }, (_, i) => (
+                  <span key={i} className="text-3xl cursor-pointer">🥭</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Baskets Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {baskets.map((count, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white p-5 rounded-3xl border-2 border-slate-200/80 shadow-sm flex flex-col items-center justify-between gap-4"
+                >
+                  <div className="font-kantumruy font-bold text-slate-700 text-sm">
+                    កន្ត្រកទី {toKhmerNumeral(idx + 1)}
+                  </div>
+
+                  <div className="w-full min-h-[100px] bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 flex flex-wrap gap-1.5 items-center justify-center">
+                    {Array.from({ length: count }, (_, i) => (
+                      <span
+                        key={i}
+                        onClick={() => handleRemoveFromBasket(idx)}
+                        className="text-2xl cursor-pointer hover:scale-125 transition-transform"
+                        title="ចុចដើម្បីដកចេញ"
+                      >
+                        🥭
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="font-kantumruy font-black text-base text-slate-800">
+                    {toKhmerNumeral(count)} ផ្លែ
+                  </div>
+
+                  <div className="flex gap-2 w-full">
+                    <button
+                      onClick={() => handleRemoveFromBasket(idx)}
+                      disabled={isSuccess || count <= 0}
+                      className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-kantumruy font-bold text-xs"
+                    >
+                      - ដកចេញ
+                    </button>
+                    <button
+                      onClick={() => handleAddToBasket(idx)}
+                      disabled={isSuccess || unassignedCount <= 0}
+                      className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-kantumruy font-bold text-xs shadow-sm"
+                    >
+                      + ដាក់ចូល
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {feedbackMsg && (
+              <div className={'p-3 rounded-2xl font-kantumruy text-sm font-bold text-center ' + (
+                isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-amber-50 text-amber-800 border border-amber-300'
+              )}>
+                {feedbackMsg}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleVerify}
+                disabled={isSuccess}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-kantumruy font-black text-base shadow-md flex items-center justify-center gap-2"
+              >
+                <IconCheck className="w-5 h-5" />
+                <span>ផ្ទៀងផ្ទាត់ការចែកស្មើ (Verify Fair Share)</span>
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div>
+          {mode === 'market_cashier' && <MarketCashier />}
+          {mode === 'balance_scale' && <BalanceScale />}
+          {mode === 'frog_hopper' && <FrogHopper />}
+          {mode === 'fair_share' && <FairShare />}
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // ENGINE D: KHMER PHONETICS & SYNTAX RAILROAD
+    // =========================================================================
+    const KhmerPhoneticsEngine = memo(({ game, onComplete }) => {
+      const mode = game.data?.mode || 'syllable_constructor';
+
+      // --- Mode 1: Syllable Constructor ---
+      const SyllableConstructor = () => {
+        const targetWord = game.data?.targetWord || 'ក្ងា';
+        const expectedBase = game.data?.base || 'ក';
+        const expectedSub = game.data?.sub || '្ង';
+        const expectedVowel = game.data?.vowel || 'ា';
+
+        const [selectedBase, setSelectedBase] = useState('');
+        const [selectedSub, setSelectedSub] = useState('');
+        const [selectedVowel, setSelectedVowel] = useState('');
+        const [isSuccess, setIsSuccess] = useState(false);
+        const [feedbackMsg, setFeedbackMsg] = useState('');
+
+        const baseConsonants = ['ក', 'ខ', 'គ', 'ច', 'ត', 'ន', 'ស'];
+        const subscripts = ['្ង', '្ម', '្រ', '្ល', '្វ'];
+        const vowels = ['ា', 'ិ', 'ី', 'ឹ', 'ឺ', 'ូ', 'ៅ'];
+
+        const assembledWord = selectedBase + selectedSub + selectedVowel;
+
+        const handleSpeakWord = () => {
+          if (assembledWord) {
+            SpeechEngine.speak(assembledWord, 'km-KH');
+          }
+        };
+
+        const handleVerify = () => {
+          if (selectedBase === expectedBase && selectedSub === expectedSub && selectedVowel === expectedVowel) {
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setIsSuccess(true);
+            setFeedbackMsg('🎉 ត្រឹមត្រូវល្អណាស់! ពាក្យ «' + targetWord + '» ផ្គុំជោគជ័យ!');
+            SpeechEngine.speak(targetWord, 'km-KH');
+            setTimeout(() => onComplete(100), 1500);
+          } else {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ ពាក្យមិនទាន់ត្រឹមត្រូវទេ! សូមពិនិត្យព្យញ្ជនៈ ជើង និងស្រៈឡើងវិញ');
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* Assembled Word Forge Display */}
+            <div className="bg-white p-8 rounded-3xl border-2 border-slate-200/80 shadow-sm flex flex-col items-center justify-center gap-4">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka">
+                គោលដៅផ្គុំពាក្យ៖ <span className="text-indigo-600 text-sm font-bold font-kantumruy">«{targetWord}»</span>
+              </div>
+
+              <div className="h-28 flex items-center justify-center px-8 bg-slate-50 border-2 border-indigo-200 rounded-3xl min-w-[200px]">
+                <div className="text-7xl font-kantumruy font-black text-indigo-700 leading-relaxed overflow-visible py-2">
+                  {assembledWord || '___'}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSpeakWord}
+                  disabled={!assembledWord}
+                  className="px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 font-kantumruy font-bold text-xs flex items-center gap-2"
+                >
+                  <IconVolume className="w-4 h-4" />
+                  <span>ស្តាប់សំឡេង</span>
+                </button>
+                <button
+                  onClick={() => { SoundBus.playPop(); setSelectedBase(''); setSelectedSub(''); setSelectedVowel(''); setFeedbackMsg(''); }}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-kantumruy font-bold text-xs hover:bg-slate-100"
+                >
+                  សម្អាត
+                </button>
+              </div>
+            </div>
+
+            {/* Selection Banks */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Base Consonants */}
+              <div className="bg-white p-4 rounded-2xl border-2 border-slate-200/80">
+                <div className="text-xs font-bold text-slate-600 font-kantumruy mb-2">១. ព្យញ្ជនៈដើម (Base)</div>
+                <div className="grid grid-cols-4 gap-2">
+                  {baseConsonants.map(c => (
+                    <button
+                      key={c}
+                      onClick={() => { SoundBus.playPop(); setSelectedBase(c); }}
+                      className={'h-12 rounded-xl border-2 font-kantumruy font-black text-xl flex items-center justify-center transition-all ' + (
+                        selectedBase === c ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-indigo-50'
+                      )}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subscripts */}
+              <div className="bg-white p-4 rounded-2xl border-2 border-slate-200/80">
+                <div className="text-xs font-bold text-slate-600 font-kantumruy mb-2">២. ជើងអក្សរ (Subscript)</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {subscripts.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => { SoundBus.playPop(); setSelectedSub(s); }}
+                      className={'h-12 rounded-xl border-2 font-kantumruy font-black text-2xl flex items-center justify-center transition-all leading-relaxed overflow-visible ' + (
+                        selectedSub === s ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-105' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-emerald-50'
+                      )}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Vowels */}
+              <div className="bg-white p-4 rounded-2xl border-2 border-slate-200/80">
+                <div className="text-xs font-bold text-slate-600 font-kantumruy mb-2">៣. ស្រៈនិស្ស័យ (Vowel)</div>
+                <div className="grid grid-cols-4 gap-2">
+                  {vowels.map(v => (
+                    <button
+                      key={v}
+                      onClick={() => { SoundBus.playPop(); setSelectedVowel(v); }}
+                      className={'h-12 rounded-xl border-2 font-kantumruy font-black text-2xl flex items-center justify-center transition-all leading-relaxed overflow-visible ' + (
+                        selectedVowel === v ? 'bg-amber-500 text-white border-amber-500 shadow-md scale-105' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-amber-50'
+                      )}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {feedbackMsg && (
+              <div className={'p-3 rounded-2xl font-kantumruy text-sm font-bold text-center ' + (
+                isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-amber-50 text-amber-800 border border-amber-300'
+              )}>
+                {feedbackMsg}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleVerify}
+                disabled={isSuccess || !selectedBase}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-kantumruy font-black text-base shadow-md flex items-center justify-center gap-2"
+              >
+                <IconCheck className="w-5 h-5" />
+                <span>ផ្ទៀងផ្ទាត់ការផ្គុំ (Verify Syllable)</span>
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      // --- Mode 2: SVO Syntax Rail ---
+      const SvoRail = () => {
+        const [slots, setSlots] = useState({
+          subject: null,
+          verb: null,
+          object: null,
+        });
+        const [selectedWord, setSelectedWord] = useState(null);
+        const [isTrainMoving, setIsTrainMoving] = useState(false);
+        const [feedbackMsg, setFeedbackMsg] = useState('');
+
+        const bank = [
+          { id: 'w-1', text: 'កូនឆ្មា', type: 'subject' },
+          { id: 'w-2', text: 'ចាប់', type: 'verb' },
+          { id: 'w-3', text: 'សត្វកណ្តុរ', type: 'object' },
+          { id: 'w-4', text: 'ញ៉ាំ', type: 'verb' },
+          { id: 'w-5', text: 'សៀវភៅ', type: 'object' },
+        ];
+
+        const handleSelectWord = (word) => {
+          SoundBus.playPop();
+          setSelectedWord(word);
+        };
+
+        const handleAssignSlot = (slotKey) => {
+          if (!selectedWord) return;
+          SoundBus.playSnap();
+          setSlots(prev => ({ ...prev, [slotKey]: selectedWord }));
+          setSelectedWord(null);
+          setFeedbackMsg('');
+        };
+
+        const handleClearSlot = (slotKey) => {
+          SoundBus.playPop();
+          setSlots(prev => ({ ...prev, [slotKey]: null }));
+          setFeedbackMsg('');
+        };
+
+        const handleDepart = () => {
+          if (slots.subject?.text === 'កូនឆ្មា' && slots.verb?.text === 'ចាប់' && slots.object?.text === 'សត្វកណ្តុរ') {
+            SoundBus.playWhistle();
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setIsTrainMoving(true);
+            setFeedbackMsg('🎉 រថភ្លើងចេញដំណើរ! ល្បះត្រូវតាមវេយ្យាករណ៍ខ្មែរ (SVO)!');
+            SpeechEngine.speak('កូនឆ្មាចាប់សត្វកណ្តុរ', 'km-KH');
+            setTimeout(() => onComplete(100), 1600);
+          } else {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ លំដាប់ល្បះមិនទាន់ត្រឹមត្រូវទេ! (ប្រធាន + កិរិយា + កម្មបទ)');
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* Railroad Track & Train */}
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-8 rounded-3xl shadow-xl overflow-hidden relative min-h-[220px]">
+              {/* Railroad Tracks */}
+              <div className="absolute bottom-6 left-0 right-0 h-4 bg-amber-900 flex justify-between items-center px-4">
+                {Array.from({ length: 30 }, (_, i) => (
+                  <div key={i} className="w-1.5 h-7 bg-amber-700 shadow-sm" />
+                ))}
+              </div>
+
+              {/* The Train Wagons */}
+              <div className={'flex items-end gap-3 transition-transform duration-1000 ease-in-out ' + (isTrainMoving ? 'translate-x-[120%]' : '')}>
+                {/* Engine Head */}
+                <div className="w-24 h-24 bg-rose-600 rounded-3xl flex flex-col items-center justify-center text-white shadow-lg border-2 border-rose-400">
+                  <span className="text-3xl">🚂</span>
+                  <span className="text-[10px] font-fredoka font-bold uppercase">Engine</span>
+                </div>
+
+                {/* Wagon 1: Subject */}
+                <div
+                  onClick={() => handleAssignSlot('subject')}
+                  className={'w-32 h-24 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-2 cursor-pointer transition-all ' + (
+                    slots.subject ? 'bg-sky-600 border-sky-400 text-white' : 'bg-sky-950/60 border-sky-400/50 text-sky-200'
+                  )}
+                >
+                  <span className="text-[10px] font-bold font-kantumruy uppercase">១. ប្រធាន (Subject)</span>
+                  <span className="font-kantumruy font-black text-lg mt-1">{slots.subject ? slots.subject.text : 'ចុចដាក់'}</span>
+                  {slots.subject && (
+                    <button onClick={(e) => { e.stopPropagation(); handleClearSlot('subject'); }} className="text-[10px] text-rose-300 hover:text-white mt-1">✕ ដក</button>
+                  )}
+                </div>
+
+                {/* Wagon 2: Verb */}
+                <div
+                  onClick={() => handleAssignSlot('verb')}
+                  className={'w-32 h-24 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-2 cursor-pointer transition-all ' + (
+                    slots.verb ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-emerald-950/60 border-emerald-400/50 text-emerald-200'
+                  )}
+                >
+                  <span className="text-[10px] font-bold font-kantumruy uppercase">២. កិរិយា (Verb)</span>
+                  <span className="font-kantumruy font-black text-lg mt-1">{slots.verb ? slots.verb.text : 'ចុចដាក់'}</span>
+                  {slots.verb && (
+                    <button onClick={(e) => { e.stopPropagation(); handleClearSlot('verb'); }} className="text-[10px] text-rose-300 hover:text-white mt-1">✕ ដក</button>
+                  )}
+                </div>
+
+                {/* Wagon 3: Object */}
+                <div
+                  onClick={() => handleAssignSlot('object')}
+                  className={'w-32 h-24 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-2 cursor-pointer transition-all ' + (
+                    slots.object ? 'bg-amber-600 border-amber-400 text-white' : 'bg-amber-950/60 border-amber-400/50 text-amber-200'
+                  )}
+                >
+                  <span className="text-[10px] font-bold font-kantumruy uppercase">៣. កម្មបទ (Object)</span>
+                  <span className="font-kantumruy font-black text-lg mt-1">{slots.object ? slots.object.text : 'ចុចដាក់'}</span>
+                  {slots.object && (
+                    <button onClick={(e) => { e.stopPropagation(); handleClearSlot('object'); }} className="text-[10px] text-rose-300 hover:text-white mt-1">✕ ដក</button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Word Bank Pool */}
+            <div className="bg-white p-6 rounded-3xl border-2 border-slate-200/80 shadow-sm">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-3">
+                ឃ្លាំងពាក្យ (Tap word, then tap train wagon to place)
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {bank.map(word => {
+                  const isPlaced = Object.values(slots).some(s => s?.id === word.id);
+                  const isSelected = selectedWord?.id === word.id;
+                  return (
+                    <button
+                      key={word.id}
+                      onClick={() => handleSelectWord(word)}
+                      disabled={isPlaced || isTrainMoving}
+                      className={'px-5 py-3 rounded-2xl border-2 font-kantumruy font-black text-base transition-all ' + (
+                        isPlaced ? 'opacity-40 border-slate-200 bg-slate-100 cursor-not-allowed' :
+                        isSelected ? 'bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-300 scale-105 shadow-md' :
+                        'bg-white text-slate-800 border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50'
+                      )}
+                    >
+                      {word.text}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {feedbackMsg && (
+              <div className={'p-3 rounded-2xl font-kantumruy text-sm font-bold text-center ' + (
+                isTrainMoving ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-amber-50 text-amber-800 border border-amber-300'
+              )}>
+                {feedbackMsg}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleDepart}
+                disabled={isTrainMoving || !slots.subject || !slots.verb || !slots.object}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-kantumruy font-black text-base shadow-md flex items-center justify-center gap-2"
+              >
+                <IconTrain className="w-5 h-5" />
+                <span>ចេញដំណើររថភ្លើង (Depart Train)</span>
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      // --- Mode 3: Silent Consonant Inspector ---
+      const SilentMarker = () => {
+        const [crowned, setCrowned] = useState(false);
+        const [feedbackMsg, setFeedbackMsg] = useState('');
+
+        const letters = [
+          { id: 'l-1', char: 'ស', isSilent: false },
+          { id: 'l-2', char: 'ប្ត', isSilent: false },
+          { id: 'l-3', char: 'ា', isSilent: false },
+          { id: 'l-4', char: 'ហ', isSilent: true },
+        ];
+
+        const handleTapLetter = (l) => {
+          if (crowned) return;
+          if (l.isSilent) {
+            SoundBus.playSuccess();
+            SoundBus.playStar();
+            setCrowned(true);
+            setFeedbackMsg('🎉 ត្រឹមត្រូវ! អក្សរ «ហ» ជាព្យញ្ជនៈស្ងាត់ ត្រូវបំបាត់សំឡេងដោយសញ្ញាទណ្ឌឃាត (៍) -> «សប្តាហ៍»!');
+            SpeechEngine.speak('សប្តាហ៍', 'km-KH');
+            setTimeout(() => onComplete(100), 1600);
+          } else {
+            SoundBus.playGentleError();
+            setFeedbackMsg('⚠️ អក្សរ «' + l.char + '» មានបញ្ចេញសំឡេង! មិនមែនជាតួស្ងាត់ទេ');
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            <div className="bg-white p-8 rounded-3xl border-2 border-slate-200/80 shadow-sm text-center">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-2">
+                ពាក្យកម្ចីបាលី-សំស្ក្រឹត (Loanword Silent Marker)
+              </div>
+              <div className="text-sm font-kantumruy text-slate-600 mb-6">
+                ចុចលើតួអក្សរដែលត្រូវពាក់សញ្ញាទណ្ឌឃាត (៍) ដើម្បីបំបាត់សំឡេង៖
+              </div>
+
+              <div className="flex justify-center items-center gap-4 py-6">
+                {letters.map(l => (
+                  <button
+                    key={l.id}
+                    onClick={() => handleTapLetter(l)}
+                    className="w-20 h-24 rounded-2xl bg-indigo-50 border-2 border-indigo-200 hover:bg-indigo-100 active:scale-95 text-4xl font-black font-kantumruy text-indigo-900 flex flex-col items-center justify-center relative shadow-sm transition-transform leading-relaxed overflow-visible"
+                  >
+                    {l.isSilent && crowned && (
+                      <span className="absolute -top-3 text-amber-500 font-bold text-3xl animate-bounce">៍</span>
+                    )}
+                    <span>{l.char}</span>
+                  </button>
+                ))}
+              </div>
+
+              {crowned && (
+                <div className="mt-4 inline-flex items-center gap-2 bg-emerald-100 border border-emerald-300 text-emerald-900 px-6 py-2 rounded-full font-kantumruy font-black text-xl shadow-sm">
+                  <span>✨</span>
+                  <span>សប្តាហ៍ (Week)</span>
+                </div>
+              )}
+            </div>
+
+            {feedbackMsg && (
+              <div className={'p-3 rounded-2xl font-kantumruy text-sm font-bold text-center ' + (
+                crowned ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-amber-50 text-amber-800 border border-amber-300'
+              )}>
+                {feedbackMsg}
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div>
+          {mode === 'syllable_constructor' && <SyllableConstructor />}
+          {mode === 'svo_rail' && <SvoRail />}
+          {mode === 'silent_marker' && <SilentMarker />}
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // ENGINE E: CHRONOLOGICAL STAGE SEQUENCER (Tap-to-Select -> Tap-to-Place)
+    // =========================================================================
+    const SequencerEngine = memo(({ game, onComplete }) => {
+      const stages = game.data?.stages || [];
+      const [pool, setPool] = useState([]);
+      const [slots, setSlots] = useState(() => Array(stages.length).fill(null));
+      const [selectedStage, setSelectedStage] = useState(null);
+      const [isSuccess, setIsSuccess] = useState(false);
+      const [feedbackMsg, setFeedbackMsg] = useState('');
+
+      useEffect(() => {
+        const shuffled = [...stages].sort(() => Math.random() - 0.5);
+        setPool(shuffled);
+        setSlots(Array(stages.length).fill(null));
+        setSelectedStage(null);
+        setIsSuccess(false);
+        setFeedbackMsg('');
+      }, [game]);
+
+      const handleSelectCard = (stage) => {
+        if (isSuccess) return;
+        SoundBus.playPop();
+        setSelectedStage(stage);
+      };
+
+      const handlePlaceInSlot = (slotIdx) => {
+        if (!selectedStage || isSuccess) return;
+        SoundBus.playSnap();
+
+        const currentInSlot = slots[slotIdx];
+        const nextSlots = [...slots];
+        nextSlots[slotIdx] = selectedStage;
+        setSlots(nextSlots);
+
+        setPool(prev => {
+          const filtered = prev.filter(s => s.id !== selectedStage.id);
+          if (currentInSlot && currentInSlot.id !== selectedStage.id) {
+            return [...filtered, currentInSlot];
+          }
+          return filtered;
+        });
+
+        setSelectedStage(null);
+        setFeedbackMsg('');
+      };
+
+      const handleRemoveFromSlot = (slotIdx) => {
+        if (isSuccess) return;
+        const stage = slots[slotIdx];
+        if (!stage) return;
+
+        SoundBus.playPop();
+        const nextSlots = [...slots];
+        nextSlots[slotIdx] = null;
+        setSlots(nextSlots);
+        setPool(prev => [...prev, stage]);
+        setFeedbackMsg('');
+      };
+
+      const handleVerifySequence = () => {
+        const isComplete = slots.every(s => s !== null);
+        if (!isComplete) {
+          SoundBus.playGentleError();
+          setFeedbackMsg('⚠️ សូមដាក់កាតចូលគ្រប់ប្រអប់ដំណាក់កាលជាមុនសិន!');
+          return;
+        }
+
+        const isCorrect = slots.every((s, idx) => s.stepNumber === idx + 1);
+
+        if (isCorrect) {
+          SoundBus.playSuccess();
+          SoundBus.playStar();
+          setIsSuccess(true);
+          setFeedbackMsg('🎉 អស្ចារ្យណាស់! អ្នកបានតម្រៀបលំដាប់លំដោយបានត្រឹមត្រូវ ១០០%!');
+          setTimeout(() => onComplete(100), 1500);
+        } else {
+          SoundBus.playGentleError();
+          setFeedbackMsg('⚠️ លំដាប់លំដោយមិនទាន់ត្រឹមត្រូវទេ! សូមពិនិត្យមើលដំណាក់កាលឡើងវិញ');
+        }
+      };
+
+      return (
+        <div className="space-y-6">
+          {/* Target Slots Runway */}
+          <div className="bg-white p-6 rounded-3xl border-2 border-slate-200/80 shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-4">
+              លំដាប់លូតលាស់ / លំដាប់កាលវេលា (Chronological Sequence)
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {slots.map((st, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handlePlaceInSlot(idx)}
+                  className={'min-h-[160px] rounded-2xl border-2 border-dashed p-4 flex flex-col items-center justify-between transition-all cursor-pointer ' + (
+                    st
+                      ? 'bg-indigo-50/70 border-indigo-400 shadow-sm'
+                      : selectedStage
+                      ? 'bg-amber-50/50 border-amber-400 hover:bg-amber-100/60 ring-2 ring-amber-300'
+                      : 'bg-slate-50 border-slate-300 hover:border-indigo-300'
+                  )}
+                >
+                  <div className="w-full flex justify-between items-center text-xs font-bold font-kantumruy text-slate-500">
+                    <span className="bg-slate-200 px-2 py-0.5 rounded-full">ដំណាក់កាលទី {toKhmerNumeral(idx + 1)}</span>
+                    {st && !isSuccess && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleRemoveFromSlot(idx); }}
+                        className="text-rose-500 hover:text-rose-700 font-bold"
+                      >
+                        ✕ ដក
+                      </button>
+                    )}
+                  </div>
+
+                  {st ? (
+                    <div className="flex flex-col items-center text-center">
+                      <span className="text-4xl my-1">{st.icon}</span>
+                      <span className="font-kantumruy font-black text-slate-800 text-sm">{st.titleKhmer}</span>
+                      <span className="font-kantumruy text-[11px] text-slate-500 mt-1">{st.descriptionKhmer}</span>
+                    </div>
+                  ) : (
+                    <div className="text-slate-400 font-kantumruy text-xs text-center py-6">
+                      {selectedStage ? 'ចុចទីនេះដើម្បីដាក់' : 'ប្រអប់ទទេ'}
+                    </div>
+                  )}
+
+                  <div className="w-full text-center text-[10px] font-fredoka uppercase text-slate-400 font-bold">
+                    Step {idx + 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Shuffled Cards Pool */}
+          <div className="bg-slate-100/80 p-6 rounded-3xl border-2 border-slate-200/80">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-3">
+              កាតដំណាក់កាល (Tap card to select, then tap slot above)
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {pool.length === 0 ? (
+                <div className="col-span-full text-center py-4 font-kantumruy text-slate-500 text-sm">
+                  កាតទាំងអស់ត្រូវបានដាក់ចូលក្នុងប្រអប់រួចរាល់ហើយ! សូមចុចផ្ទៀងផ្ទាត់ខាងក្រោម
+                </div>
+              ) : (
+                pool.map(st => {
+                  const isSelected = selectedStage?.id === st.id;
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => handleSelectCard(st)}
+                      className={'p-4 rounded-2xl border-2 bg-white flex flex-col items-center text-center gap-1.5 transition-all shadow-sm ' + (
+                        isSelected
+                          ? 'ring-4 ring-indigo-500 scale-105 shadow-xl border-indigo-500 bg-indigo-50/30'
+                          : 'border-slate-200 hover:border-indigo-300 hover:scale-102 active:scale-95'
+                      )}
+                    >
+                      <span className="text-3xl">{st.icon}</span>
+                      <span className="font-kantumruy font-black text-slate-800 text-sm">{st.titleKhmer}</span>
+                      <span className="font-kantumruy text-[10px] text-slate-500">{st.descriptionKhmer}</span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {feedbackMsg && (
+            <div className={'p-3 rounded-2xl font-kantumruy text-sm font-bold text-center ' + (
+              isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-amber-50 text-amber-800 border border-amber-300'
+            )}>
+              {feedbackMsg}
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              onClick={handleVerifySequence}
+              disabled={isSuccess || slots.some(s => s === null)}
+              className={'w-full sm:w-auto px-8 py-3.5 rounded-2xl font-kantumruy font-black text-base text-white shadow-md flex items-center justify-center gap-2 transition-all ' + (
+                isSuccess || slots.some(s => s === null)
+                  ? 'bg-slate-300 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 active:scale-98'
+              )}
+            >
+              <IconCheck className="w-5 h-5" />
+              <span>ផ្ទៀងផ្ទាត់លំដាប់ (Verify Sequence)</span>
+            </button>
+          </div>
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // FLOATING SUBTITLE BANNER (Decoupled Audio Broadcaster)
+    // =========================================================================
+    const SubtitleBanner = memo(() => {
+      const [subtitle, setSubtitle] = useState('');
+      const [visible, setVisible] = useState(false);
+
+      useEffect(() => {
+        let timer = null;
+        const unsubscribe = SoundBus.onSubtitle((text) => {
+          setSubtitle(text);
+          setVisible(true);
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => {
+            setVisible(false);
+          }, 4500);
+        });
+
+        return () => {
+          if (unsubscribe) unsubscribe();
+          if (timer) clearTimeout(timer);
+        };
+      }, []);
+
+      if (!visible || !subtitle) return null;
+
+      return (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-xl w-11/12 animate-bounce-short pointer-events-none">
+          <div className="bg-slate-900/95 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 backdrop-blur-md">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shrink-0 shadow-inner">
+              <IconVolume className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="flex-1 font-kantumruy font-bold text-sm sm:text-base leading-relaxed overflow-visible py-1 text-slate-100">
+              {subtitle}
+            </div>
+          </div>
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // VICTORY MODAL (Celebration & High Replayability)
+    // =========================================================================
+    const VictoryModal = memo(({ onPlayAgain, onBackToHub, score = 100 }) => {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full border-4 border-amber-300 shadow-2xl text-center flex flex-col items-center gap-5 transform transition-all animate-bounce-short">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-5xl shadow-lg border-4 border-white -mt-16">
+              🏆
+            </div>
+
+            <div className="flex gap-2 text-amber-400 text-3xl justify-center">
+              <span>⭐</span>
+              <span className="scale-125 -translate-y-1">⭐</span>
+              <span>⭐</span>
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-black font-kantumruy text-slate-800">
+                អបអរសាទរ! ពូកែណាស់!
+              </h2>
+              <p className="text-slate-500 font-kantumruy text-sm mt-1">
+                អ្នកបានបញ្ចប់ការលេងដោយជោគជ័យ និងទទួលបាន {toKhmerNumeral(score)} ពិន្ទុ!
+              </p>
+            </div>
+
+            <div className="w-full bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex justify-around font-kantumruy">
+              <div>
+                <div className="text-xs text-slate-500">ផ្កាយទទួលបាន</div>
+                <div className="text-xl font-black text-amber-600 font-fredoka">+3 ⭐</div>
+              </div>
+              <div className="w-px bg-amber-200" />
+              <div>
+                <div className="text-xs text-slate-500">ពិន្ទុបន្ថែម</div>
+                <div className="text-xl font-black text-emerald-600 font-fredoka">+{score} pts</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+              <button
+                onClick={onPlayAgain}
+                className="flex-1 py-3.5 px-4 rounded-2xl border-2 border-slate-200 hover:bg-slate-100 font-kantumruy font-bold text-slate-700 flex items-center justify-center gap-2 transition-transform active:scale-95"
+              >
+                <IconRotateCcw className="w-5 h-5 text-slate-600" />
+                <span>លេងម្តងទៀត</span>
+              </button>
+
+              <button
+                onClick={onBackToHub}
+                className="flex-1 py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-kantumruy font-black text-white shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-indigo-200"
+              >
+                <IconArrowLeft className="w-5 h-5" />
+                <span>ត្រឡប់ទៅមឺនុយ</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // UNIVERSAL GAME RUNNER (Header HUD + Engine Orchestrator)
+    // =========================================================================
+    const UniversalGameRunner = memo(({ game, onBack, onCompleteLevel, currentStars }) => {
+      const [resetKey, setResetKey] = useState(0);
+      const [showVictory, setShowVictory] = useState(false);
+      const [levelScore, setLevelScore] = useState(100);
+
+      const handleRestart = () => {
+        SoundBus.playPop();
+        setResetKey(prev => prev + 1);
+        setShowVictory(false);
+      };
+
+      const handleGameWin = (score = 100) => {
+        setLevelScore(score);
+        setShowVictory(true);
+        if (onCompleteLevel) onCompleteLevel(score);
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-50 flex flex-col pb-16">
+          {/* Top HUD */}
+          <header className="bg-white border-b-2 border-slate-200/80 sticky top-0 z-40 px-4 py-3 sm:px-8 shadow-sm">
+            <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={onBack}
+                  className="p-2.5 rounded-2xl border-2 border-slate-200 hover:bg-slate-100 active:scale-95 text-slate-700 transition-all"
+                  title="ត្រឡប់ទៅមឺនុយ"
+                >
+                  <IconArrowLeft className="w-5 h-5" />
+                </button>
+
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{game.icon || '🎮'}</span>
+                    <h1 className="font-kantumruy font-black text-slate-800 text-base sm:text-lg leading-tight line-clamp-1">
+                      {game.titleKhmer}
+                    </h1>
+                  </div>
+                  <div className="text-slate-400 text-xs font-fredoka font-semibold line-clamp-1">
+                    {game.titleEnglish}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-2xl">
+                  <span className="text-amber-500 font-bold text-base">⭐</span>
+                  <span className="font-fredoka font-bold text-amber-900 text-sm">{currentStars}</span>
+                </div>
+
+                <button
+                  onClick={handleRestart}
+                  className="p-2.5 rounded-2xl border-2 border-slate-200 hover:bg-slate-100 active:scale-95 text-slate-700 transition-all"
+                  title="លេងឡើងវិញ"
+                >
+                  <IconRotateCcw className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Instructional Prompt Banner */}
+          <div className="max-w-4xl mx-auto w-full px-4 pt-6">
+            <div className="bg-indigo-50/80 border-2 border-indigo-200/90 rounded-3xl p-4 sm:p-5 flex items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <IconSparkles className="w-5 h-5" />
+                </div>
+                <p className="font-kantumruy font-bold text-indigo-950 text-sm sm:text-base leading-relaxed overflow-visible py-1">
+                  {game.promptText}
+                </p>
+              </div>
+              <SpeakerButton text={game.promptText} className="shrink-0" />
+            </div>
+          </div>
+
+          {/* Engine Playground Stage */}
+          <main className="max-w-4xl mx-auto w-full px-4 pt-6 flex-1">
+            {game.engineType === 'sorter' && (
+              <SorterEngine key={resetKey} game={game} onComplete={handleGameWin} />
+            )}
+            {game.engineType === 'sandbox' && (
+              <SandboxEngine key={resetKey} game={game} onComplete={handleGameWin} />
+            )}
+            {game.engineType === 'math_cra' && (
+              <MathCraEngine key={resetKey} game={game} onComplete={handleGameWin} />
+            )}
+            {game.engineType === 'khmer_phonetics' && (
+              <KhmerPhoneticsEngine key={resetKey} game={game} onComplete={handleGameWin} />
+            )}
+            {game.engineType === 'sequencer' && (
+              <SequencerEngine key={resetKey} game={game} onComplete={handleGameWin} />
+            )}
+          </main>
+
+          {/* Victory Modal */}
+          {showVictory && (
+            <VictoryModal
+              score={levelScore}
+              onPlayAgain={handleRestart}
+              onBackToHub={onBack}
+            />
+          )}
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // AVATAR & USER PROFILE MODAL
+    // =========================================================================
+    const AvatarModal = memo(({ isOpen, onClose, currentProfile, onSaveProfile }) => {
+      const [name, setName] = useState(currentProfile?.name || 'កុមារឆ្លាត');
+      const [avatar, setAvatar] = useState(currentProfile?.avatar || '🦁');
+
+      const avatarOptions = ['🦁', '🐘', '🐒', '🐯', '🐰', '🦉', '🐬', '🐼', '🦊', '🦒'];
+
+      if (!isOpen) return null;
+
+      const handleSave = () => {
+        SoundBus.playSuccess();
+        onSaveProfile({ ...currentProfile, name, avatar });
+        onClose();
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border-2 border-slate-200 shadow-2xl flex flex-col gap-5">
+            <div className="flex justify-between items-center">
+              <h3 className="font-kantumruy font-black text-slate-800 text-xl">
+                ព័ត៌មានកុមារឆ្លាត (Profile)
+              </h3>
+              <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
+                <IconX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Avatar Selector */}
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-2">
+                ជ្រើសរើសរូបតំណាង (Avatar)
+              </label>
+              <div className="grid grid-cols-5 gap-2">
+                {avatarOptions.map(av => (
+                  <button
+                    key={av}
+                    onClick={() => { SoundBus.playPop(); setAvatar(av); }}
+                    className={`h-14 rounded-2xl border-2 text-2xl flex items-center justify-center transition-all ${
+                      avatar === av ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-400 scale-105 shadow-sm' : 'border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {av}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Nickname Input */}
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-2">
+                ឈ្មោះកុមារ (Name / Nickname)
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 font-kantumruy font-bold text-slate-800 focus:outline-none focus:border-indigo-500"
+                placeholder="សូមបញ្ចូលឈ្មោះ..."
+              />
+            </div>
+
+            <button
+              onClick={handleSave}
+              className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-kantumruy font-black text-white shadow-md active:scale-98 transition-all"
+            >
+              រក្សាទុក (Save Profile)
+            </button>
+          </div>
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // AI GAME STUDIO MODAL (Lesson Ingestion -> Playable Sandbox Compiler)
+    // =========================================================================
+    const AIGameStudioModal = memo(({ isOpen, onClose, onSaveCustomGame }) => {
+      const [lessonText, setLessonText] = useState('');
+      const [selectedPreset, setSelectedPreset] = useState('');
+      const [generatedGame, setGeneratedGame] = useState(null);
+      const [activeTab, setActiveTab] = useState('editor'); // 'editor' | 'preview'
+      const [studioStatus, setStudioStatus] = useState('');
+
+      const presets = [
+        {
+          id: 'p-phonics',
+          label: 'ភាសាខ្មែរ ថ្នាក់ទី១៖ ព្យញ្ជនៈពួក អ និងពួក អ៊',
+          text: 'មេរៀនព្យញ្ជនៈខ្មែរ៖ សូមបែងចែកតួអក្សរជាពីរពួកគឺ ពួក អ (ក, ខ, ច, ឆ) និងពួក អ៊ (គ, ឃ, ជ, ឈ) ដើម្បីឲ្យសិស្សស្គាល់សំឡេងស្រាល និងសំឡេងធ្ងន់។'
+        },
+        {
+          id: 'p-water',
+          label: 'វិទ្យាសាស្ត្រ ថ្នាក់ទី៣៖ វដ្តនៃទឹកធម្មជាតិ',
+          text: 'មេរៀនវដ្តនៃទឹក៖ មាន ៤ ដំណាក់កាលគឺ ១. រំហួត (កម្ដៅថ្ងៃបំភាយទឹក) ២. កំណក (ចំហាយទឹកផ្តុំជាពពក) ៣. ទឹកភ្លៀង (ពពកធ្លាក់ជាទឹកភ្លៀង) ៤. ការប្រមូលផ្តុំ (ទឹកហូរចូលបឹងនិងសមុទ្រ)។'
+        },
+        {
+          id: 'p-market',
+          label: 'គណិតវិទ្យា ថ្នាក់ទី២៖ ការទូទាត់ប្រាក់រៀលនៅផ្សារ',
+          text: 'មេរៀនប្រាក់រៀលខ្មែរ៖ ការទិញទំនិញតម្លៃ ៤,៥០០ រៀល។ សិស្សត្រូវរៀបចំក្រដាសប្រាក់រៀល ១០០៛, ៥០០៛, ១០០០៛, ២០០០៛ ឲ្យបានគ្រប់ចំនួន។'
+        }
+      ];
+
+      if (!isOpen) return null;
+
+      const handleSelectPreset = (presetId) => {
+        const p = presets.find(item => item.id === presetId);
+        if (p) {
+          setSelectedPreset(presetId);
+          setLessonText(p.text);
+          SoundBus.playPop();
+        }
+      };
+
+      const handleCompileLesson = () => {
+        if (!lessonText.trim()) {
+          setStudioStatus('⚠️ សូមបញ្ចូលខ្លឹមសារមេរៀន ឬជ្រើសរើសគំរូជាមុនសិន!');
+          SoundBus.playGentleError();
+          return;
+        }
+
+        SoundBus.playSparkle();
+        setStudioStatus('🤖 AI កំពុងវិភាគវេយ្យាករណ៍ និងបង្កើតហ្គេម...');
+
+        setTimeout(() => {
+          let compiled = null;
+          const textLower = lessonText.toLowerCase();
+
+          if (textLower.includes('វដ្ត') || textLower.includes('ដំណាក់កាល') || textLower.includes('cycle')) {
+            // Compile Sequencer Game
+            compiled = {
+              id: 'custom-seq-' + Date.now(),
+              engineType: 'sequencer',
+              titleKhmer: 'វដ្តធម្មជាតិ AI',
+              titleEnglish: 'AI Generated Sequence',
+              grade: 3,
+              subject: 'science',
+              icon: '💧',
+              promptText: 'សូមតម្រៀបដំណាក់កាលខាងក្រោមតាមលំដាប់លំដោយត្រឹមត្រូវ៖',
+              data: {
+                mode: 'water_cycle',
+                stages: [
+                  { id: 's-1', stepNumber: 1, titleKhmer: 'រំហួត', descriptionKhmer: 'កម្ដៅថ្ងៃបំភាយទឹក', icon: '☀️' },
+                  { id: 's-2', stepNumber: 2, titleKhmer: 'កំណក', descriptionKhmer: 'ផ្តុំគ្នាជាពពក', icon: '☁️' },
+                  { id: 's-3', stepNumber: 3, titleKhmer: 'ទឹកភ្លៀង', descriptionKhmer: 'ធ្លាក់ជាដំណក់ទឹកភ្លៀង', icon: '🌧️' },
+                  { id: 's-4', stepNumber: 4, titleKhmer: 'ប្រមូលផ្តុំ', descriptionKhmer: 'ហូរចូលបឹងសមុទ្រ', icon: '🌊' }
+                ]
+              }
+            };
+          } else if (textLower.includes('ប្រាក់') || textLower.includes('រៀល') || textLower.includes('ទិញ') || textLower.includes('cash')) {
+            // Compile CRA Math Market Game
+            compiled = {
+              id: 'custom-math-' + Date.now(),
+              engineType: 'math_cra',
+              titleKhmer: 'ផ្សារទិញទំនិញ AI',
+              titleEnglish: 'AI Market Cashier Game',
+              grade: 2,
+              subject: 'math',
+              icon: '🪙',
+              promptText: 'សូមចុចជ្រើសរើសក្រដាសប្រាក់រៀលដើម្បីទូទាត់ឲ្យបានគ្រប់ចំនួន ៤,៥០០៛៖',
+              data: { mode: 'market_cashier', targetTotal: 4500 }
+            };
+          } else {
+            // Default: Attribute Sorter
+            compiled = {
+              id: 'custom-sorter-' + Date.now(),
+              engineType: 'sorter',
+              titleKhmer: 'បែងចែកក្រុម AI',
+              titleEnglish: 'AI Smart Sorter Game',
+              grade: 1,
+              subject: 'khmer',
+              icon: '🔤',
+              promptText: 'សូមបែងចែកព្យញ្ជនៈទៅតាមពួក អ និងពួក អ៊ ឲ្យបានត្រឹមត្រូវ៖',
+              data: {
+                mode: 'phonetic_series',
+                bins: [
+                  { id: 'b-o', nameKhmer: 'ពួក អ (Series O)', colorClass: 'from-sky-500 to-sky-600', icon: '☀️' },
+                  { id: 'b-or', nameKhmer: 'ពួក អ៊ (Series OR)', colorClass: 'from-indigo-500 to-indigo-600', icon: '🌊' }
+                ],
+                entities: [
+                  { id: 'c-1', nameKhmer: 'ក', icon: 'ក', correctBinId: 'b-o' },
+                  { id: 'c-2', nameKhmer: 'គ', icon: 'គ', correctBinId: 'b-or' },
+                  { id: 'c-3', nameKhmer: 'ខ', icon: 'ខ', correctBinId: 'b-o' },
+                  { id: 'c-4', nameKhmer: 'ឃ', icon: 'ឃ', correctBinId: 'b-or' }
+                ]
+              }
+            };
+          }
+
+          setGeneratedGame(compiled);
+          setActiveTab('preview');
+          setStudioStatus('✅ បង្កើតហ្គេមជោគជ័យ! អ្នកអាចសាកល្បងលេងផ្ទាល់ក្នុងផ្ទាំង Preview');
+          SoundBus.playSuccess();
+        }, 800);
+      };
+
+      const handleSave = () => {
+        if (!generatedGame) return;
+        onSaveCustomGame(generatedGame);
+        SoundBus.playStar();
+        onClose();
+      };
+
+      const handleExportJson = () => {
+        if (!generatedGame) return;
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(generatedGame, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `smartkids-game-${generatedGame.id}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        SoundBus.playCoin();
+      };
+
+      const handleImportJson = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target?.result);
+            if (parsed && parsed.engineType) {
+              setGeneratedGame(parsed);
+              setActiveTab('preview');
+              setStudioStatus('✅ បានបញ្ចូល JSON ហ្គេមដោយជោគជ័យ!');
+              SoundBus.playSuccess();
+            }
+          } catch (err) {
+            setStudioStatus('⚠️ ឯកសារ JSON មិនត្រឹមត្រូវ!');
+            SoundBus.playGentleError();
+          }
+        };
+        reader.readAsText(file);
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col border-2 border-slate-200 shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="p-6 border-b-2 border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md">
+                  🤖
+                </div>
+                <div>
+                  <h3 className="font-kantumruy font-black text-slate-800 text-lg">
+                    រោងចក្របង្កើតហ្គេម AI (Lesson-to-Game Studio)
+                  </h3>
+                  <p className="text-slate-400 font-fredoka text-xs">Cambodian MoEYS Curriculum AI Compiler</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex bg-slate-100 p-1 rounded-2xl">
+                  <button
+                    onClick={() => setActiveTab('editor')}
+                    className={`px-4 py-1.5 rounded-xl font-kantumruy font-bold text-xs transition-all ${
+                      activeTab === 'editor' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'
+                    }`}
+                  >
+                    មេរៀន (Editor)
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('preview')}
+                    disabled={!generatedGame}
+                    className={`px-4 py-1.5 rounded-xl font-kantumruy font-bold text-xs transition-all ${
+                      activeTab === 'preview' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 disabled:opacity-40'
+                    }`}
+                  >
+                    សាកល្បង (Live Preview)
+                  </button>
+                </div>
+
+                <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
+                  <IconX className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body Content */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-5">
+              {activeTab === 'editor' ? (
+                <>
+                  {/* Preset Dropdown */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-2">
+                      ជ្រើសរើសគំរូមេរៀនតាមស្តង់ដារក្រសួង (MoEYS Presets)
+                    </label>
+                    <select
+                      value={selectedPreset}
+                      onChange={(e) => handleSelectPreset(e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 font-kantumruy font-bold text-sm text-slate-700 focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="">-- ជ្រើសរើសគំរូមេរៀន --</option>
+                      {presets.map(p => (
+                        <option key={p.id} value={p.id}>{p.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Textarea */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider font-fredoka mb-2">
+                      ខ្លឹមសារមេរៀន / កំណត់ត្រាបង្រៀន (Paste MoEYS Lesson Text)
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={lessonText}
+                      onChange={(e) => setLessonText(e.target.value)}
+                      className="w-full p-4 rounded-2xl border-2 border-slate-200 font-kantumruy font-bold text-sm text-slate-800 focus:outline-none focus:border-indigo-500 leading-relaxed"
+                      placeholder="សូមបិទភ្ជាប់ខ្លឹមសារមេរៀនទីនេះ..."
+                    />
+                  </div>
+
+                  {studioStatus && (
+                    <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-950 font-kantumruy font-bold text-xs">
+                      {studioStatus}
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <label className="cursor-pointer px-4 py-2.5 rounded-xl border-2 border-slate-200 hover:bg-slate-50 text-slate-700 font-kantumruy font-bold text-xs flex items-center gap-2">
+                      <IconUpload className="w-4 h-4" />
+                      <span>បញ្ចូល JSON</span>
+                      <input type="file" accept=".json" onChange={handleImportJson} className="hidden" />
+                    </label>
+
+                    <button
+                      onClick={handleCompileLesson}
+                      className="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-kantumruy font-black text-sm shadow-md flex items-center gap-2"
+                    >
+                      <IconSparkles className="w-4 h-4" />
+                      <span>✨ បង្កើតហ្គេមដោយ AI (Compile Game)</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* Live Preview Mode */
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex justify-between items-center">
+                    <div>
+                      <span className="font-kantumruy font-black text-slate-800">{generatedGame?.titleKhmer}</span>
+                      <span className="text-xs text-slate-500 block font-fredoka">{generatedGame?.engineType} engine</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleExportJson}
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-kantumruy text-xs font-bold flex items-center gap-1.5"
+                      >
+                        <IconDownload className="w-3.5 h-3.5" />
+                        <span>Export JSON</span>
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-kantumruy text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                      >
+                        <IconCheck className="w-3.5 h-3.5" />
+                        <span>រក្សាទុកក្នុងហ្គេមខ្ញុំ</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="border-2 border-slate-200 rounded-3xl p-4 bg-white min-h-[300px]">
+                    {generatedGame?.engineType === 'sorter' && (
+                      <SorterEngine game={generatedGame} onComplete={() => SoundBus.playSuccess()} />
+                    )}
+                    {generatedGame?.engineType === 'math_cra' && (
+                      <MathCraEngine game={generatedGame} onComplete={() => SoundBus.playSuccess()} />
+                    )}
+                    {generatedGame?.engineType === 'sequencer' && (
+                      <SequencerEngine game={generatedGame} onComplete={() => SoundBus.playSuccess()} />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // GAME HUB DASHBOARD (Bento Grid Navigation)
+    // =========================================================================
+    const GameHub = memo(({
+      games,
+      customGames,
+      onSelectGame,
+      userProfile,
+      onOpenProfile,
+      onOpenStudio,
+      isMuted,
+      onToggleMute
+    }) => {
+      const [selectedGrade, setSelectedGrade] = useState('all');
+      const [selectedSubject, setSelectedSubject] = useState('all');
+      const [selectedEngine, setSelectedEngine] = useState('all');
+      const [searchQuery, setSearchQuery] = useState('');
+
+      const filteredGames = useMemo(() => {
+        return games.filter(g => {
+          if (selectedGrade !== 'all' && g.grade !== Number(selectedGrade)) return false;
+          if (selectedSubject !== 'all' && g.subject !== selectedSubject) return false;
+          if (selectedEngine !== 'all' && g.engineType !== selectedEngine) return false;
+          if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            const matchKhmer = g.titleKhmer?.toLowerCase().includes(q);
+            const matchEnglish = g.titleEnglish?.toLowerCase().includes(q);
+            if (!matchKhmer && !matchEnglish) return false;
+          }
+          return true;
+        });
+      }, [games, selectedGrade, selectedSubject, selectedEngine, searchQuery]);
+
+      const subjectPills = [
+        { id: 'all', labelKhmer: 'ទាំងអស់', icon: '✨' },
+        { id: 'khmer', labelKhmer: 'ភាសាខ្មែរ', icon: '📖' },
+        { id: 'math', labelKhmer: 'គណិតវិទ្យា', icon: '🧮' },
+        { id: 'science', labelKhmer: 'វិទ្យាសាស្ត្រ', icon: '🔬' },
+      ];
+
+      const enginePills = [
+        { id: 'all', label: 'All Engines' },
+        { id: 'sorter', label: 'Sorter' },
+        { id: 'sandbox', label: 'Sandbox' },
+        { id: 'math_cra', label: 'CRA Math' },
+        { id: 'khmer_phonetics', label: 'Phonetics' },
+        { id: 'sequencer', label: 'Sequencer' },
+      ];
+
+      return (
+        <div className="min-h-screen bg-slate-50 flex flex-col">
+          {/* Bento Header */}
+          <header className="bg-white border-b-2 border-slate-200/80 sticky top-0 z-40 px-4 py-3 sm:px-8 shadow-sm">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              {/* Logo */}
+              <div className="flex items-center gap-3 cursor-pointer">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 text-white flex items-center justify-center text-2xl shadow-md border-2 border-white">
+                  🇰🇭
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-kantumruy font-black text-xl text-slate-800 tracking-tight">កុមារឆ្លាត</span>
+                    <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded-full font-fredoka uppercase">MoEYS</span>
+                  </div>
+                  <div className="text-slate-400 text-xs font-fredoka font-bold">SmartKids Cambodia Primary</div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  onClick={onToggleMute}
+                  className="p-2.5 rounded-2xl border-2 border-slate-200 hover:bg-slate-100 text-slate-700 transition-all"
+                  title="បិទ/បើកសំឡេង"
+                >
+                  {isMuted ? <IconVolumeOff className="w-5 h-5 text-rose-500" /> : <IconVolume className="w-5 h-5 text-indigo-600" />}
+                </button>
+
+                <button
+                  onClick={onOpenStudio}
+                  className="px-4 py-2.5 rounded-2xl bg-indigo-50 border-2 border-indigo-200 hover:bg-indigo-100 text-indigo-700 font-kantumruy font-black text-xs sm:text-sm flex items-center gap-2 transition-all shadow-sm"
+                >
+                  <IconSparkles className="w-4 h-4 text-indigo-600" />
+                  <span className="hidden sm:inline">បង្កើតហ្គេម</span>
+                  <span>AI Studio</span>
+                </button>
+
+                {/* Profile Pill */}
+                <button
+                  onClick={onOpenProfile}
+                  className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 p-1.5 pr-3 rounded-2xl transition-all border border-slate-200"
+                >
+                  <span className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-lg shadow-sm">
+                    {userProfile?.avatar || '🦁'}
+                  </span>
+                  <div className="text-left hidden md:block">
+                    <div className="font-kantumruy font-bold text-xs text-slate-800 leading-none line-clamp-1">{userProfile?.name}</div>
+                    <div className="text-[10px] text-amber-600 font-bold font-fredoka leading-none mt-1">⭐ {userProfile?.stars}</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Hero Bento Banner */}
+          <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 pt-6">
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+              <div className="space-y-3 z-10 max-w-xl">
+                <span className="bg-white/20 text-white text-xs font-black font-fredoka px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-sm">
+                  Grades 1–3 MoEYS Interactive Curriculum
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black font-kantumruy leading-relaxed">
+                  រៀនលេងសប្បាយជាមួយកុមារឆ្លាត! 🌟
+                </h2>
+                <p className="text-indigo-100 font-kantumruy text-sm sm:text-base leading-relaxed">
+                  រៀនអក្សរខ្មែរ គណិតវិទ្យា និងវិទ្យាសាស្ត្រតាមបែបល្បែងអន្តរកម្ម Tactile ប៉ះលេងបានភ្លាមៗ!
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 z-10">
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 text-center min-w-[100px]">
+                  <div className="text-3xl font-black font-fredoka">{games.length}</div>
+                  <div className="text-xs text-indigo-200 font-kantumruy font-bold">ហ្គេមស្តង់ដារ</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 text-center min-w-[100px]">
+                  <div className="text-3xl font-black font-fredoka">5</div>
+                  <div className="text-xs text-indigo-200 font-kantumruy font-bold">ប្រព័ន្ធម៉ាស៊ីន</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Toolbar */}
+          <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 pt-6 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
+              {/* Grade Selector */}
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {[
+                  { id: 'all', label: 'ទាំងអស់ (All)' },
+                  { id: '1', label: 'ថ្នាក់ទី១ (G1)' },
+                  { id: '2', label: 'ថ្នាក់ទី២ (G2)' },
+                  { id: '3', label: 'ថ្នាក់ទី៣ (G3)' },
+                ].map(gr => (
+                  <button
+                    key={gr.id}
+                    onClick={() => { SoundBus.playPop(); setSelectedGrade(gr.id); }}
+                    className={`px-4 py-2 rounded-2xl font-kantumruy font-bold text-xs sm:text-sm whitespace-nowrap transition-all border-2 ${
+                      selectedGrade === gr.id
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {gr.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative min-w-[260px]">
+                <IconSearch className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="ស្វែងរកហ្គេម (Search)..."
+                  className="w-full pl-11 pr-4 py-2.5 rounded-2xl border-2 border-slate-200 bg-white font-kantumruy text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* Subject Filters */}
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {subjectPills.map(sb => (
+                <button
+                  key={sb.id}
+                  onClick={() => { SoundBus.playPop(); setSelectedSubject(sb.id); }}
+                  className={`px-4 py-2 rounded-2xl font-kantumruy font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1.5 border ${
+                    selectedSubject === sb.id
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>{sb.icon}</span>
+                  <span>{sb.labelKhmer}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Games Bento Grid */}
+          <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 flex-1">
+            {/* Custom Games Section (if any) */}
+            {customGames.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xl">✨</span>
+                  <h3 className="font-kantumruy font-black text-slate-800 text-lg">ហ្គេមផ្ទាល់ខ្លួន AI (My Custom Games)</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {customGames.map(cg => (
+                    <div
+                      key={cg.id}
+                      onClick={() => { SoundBus.playPop(); onSelectGame(cg); }}
+                      className="bg-white rounded-3xl p-5 border-2 border-indigo-200 hover:border-indigo-500 shadow-sm hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                          {cg.icon || '🤖'}
+                        </div>
+                        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold font-fredoka px-2.5 py-1 rounded-xl">
+                          AI Custom
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-kantumruy font-black text-slate-800 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">
+                          {cg.titleKhmer}
+                        </h4>
+                        <p className="text-xs font-fredoka text-slate-400 font-semibold line-clamp-1">{cg.titleEnglish}</p>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs font-kantumruy text-slate-500">
+                        <span>ម៉ាស៊ីន៖ {cg.engineType}</span>
+                        <span className="text-indigo-600 font-bold group-hover:translate-x-1 transition-transform">លេង ➔</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Official MoEYS Curriculum Games */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📚</span>
+                <h3 className="font-kantumruy font-black text-slate-800 text-lg">
+                  បញ្ជីហ្គេមមេរៀន MoEYS ({filteredGames.length})
+                </h3>
+              </div>
+            </div>
+
+            {filteredGames.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border-2 border-slate-200 shadow-sm">
+                <div className="text-5xl mb-3">🔍</div>
+                <h4 className="font-kantumruy font-black text-slate-700 text-lg">មិនមានហ្គេមត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ</h4>
+                <p className="font-kantumruy text-slate-400 text-sm mt-1">សូមជ្រើសរើសថ្នាក់ ឬមុខវិជ្ជាផ្សេងទៀត</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredGames.map(game => {
+                  const subjectBadge = {
+                    khmer: { bg: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'ភាសាខ្មែរ' },
+                    math: { bg: 'bg-amber-50 text-amber-700 border-amber-200', label: 'គណិតវិទ្យា' },
+                    science: { bg: 'bg-sky-50 text-sky-700 border-sky-200', label: 'វិទ្យាសាស្ត្រ' },
+                  }[game.subject] || { bg: 'bg-slate-50 text-slate-700 border-slate-200', label: 'ទូទៅ' };
+
+                  return (
+                    <div
+                      key={game.id}
+                      onClick={() => { SoundBus.playPop(); onSelectGame(game); }}
+                      className="bg-white rounded-3xl p-6 border-2 border-slate-200/80 hover:border-indigo-500 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+                          {game.icon}
+                        </div>
+
+                        <div className="flex flex-col items-end gap-1.5">
+                          <span className={`text-[11px] font-kantumruy font-bold px-2.5 py-0.5 rounded-full border ${subjectBadge.bg}`}>
+                            {subjectBadge.label}
+                          </span>
+                          <span className="text-[10px] font-fredoka font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                            Grade {game.grade}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-kantumruy font-black text-slate-800 text-base sm:text-lg group-hover:text-indigo-600 transition-colors leading-snug line-clamp-1">
+                          {game.titleKhmer}
+                        </h4>
+                        <p className="text-xs font-fredoka text-slate-400 font-semibold line-clamp-1 mt-0.5">
+                          {game.titleEnglish}
+                        </p>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-[11px] font-fredoka font-bold uppercase text-slate-400">
+                          {game.engineType.replace('_', ' ')}
+                        </span>
+
+                        <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
+                          <IconPlay className="w-4 h-4 ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer className="bg-white border-t-2 border-slate-200/80 py-6 px-4 text-center">
+            <p className="font-kantumruy font-bold text-slate-500 text-xs sm:text-sm">
+              កម្មវិធីអប់រំកុមារឆ្លាត (SmartKids Cambodia) • ស្របតាមកម្មវិធីសិក្សាបឋមសិក្សា MoEYS
+            </p>
+            <p className="font-fredoka text-slate-400 text-xs mt-1">
+              Zero-Dependency Standalone React 19 Engine • Tactile Touch-First Learning
+            </p>
+          </footer>
+        </div>
+      );
+    });
+
+    // =========================================================================
+    // ROOT APP COMPONENT (State Wiring & Persistence)
+    // =========================================================================
+    const App = () => {
+      const [view, setView] = useState('hub'); // 'hub' | 'runner'
+      const [activeGame, setActiveGame] = useState(null);
+      const [isMuted, setIsMuted] = useState(false);
+      const [showProfileModal, setShowProfileModal] = useState(false);
+      const [showStudioModal, setShowStudioModal] = useState(false);
+
+      const [userProfile, setUserProfile] = useState(() => {
+        try {
+          const saved = localStorage.getItem('smartkids_user');
+          if (saved) return JSON.parse(saved);
+        } catch (e) {}
+        return { name: 'កុមារឆ្លាត', avatar: '🦁', stars: 240 };
+      });
+
+      const [customGames, setCustomGames] = useState(() => {
+        try {
+          const saved = localStorage.getItem('smartkids_custom_games');
+          if (saved) return JSON.parse(saved);
+        } catch (e) {}
+        return [];
+      });
+
+      const handleToggleMute = useCallback(() => {
+        const next = SoundFX.toggleMute();
+        setIsMuted(next);
+      }, []);
+
+      const handleSelectGame = useCallback((game) => {
+        setActiveGame(game);
+        setView('runner');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, []);
+
+      const handleBackToHub = useCallback(() => {
+        SoundBus.playPop();
+        setView('hub');
+        setActiveGame(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, []);
+
+      const handleCompleteLevel = useCallback((points = 100) => {
+        setUserProfile(prev => {
+          const next = { ...prev, stars: prev.stars + 3 };
+          try {
+            localStorage.setItem('smartkids_user', JSON.stringify(next));
+          } catch (e) {}
+          return next;
+        });
+      }, []);
+
+      const handleSaveProfile = useCallback((newProfile) => {
+        setUserProfile(newProfile);
+        try {
+          localStorage.setItem('smartkids_user', JSON.stringify(newProfile));
+        } catch (e) {}
+      }, []);
+
+      const handleSaveCustomGame = useCallback((newGame) => {
+        setCustomGames(prev => {
+          const next = [newGame, ...prev];
+          try {
+            localStorage.setItem('smartkids_custom_games', JSON.stringify(next));
+          } catch (e) {}
+          return next;
+        });
+      }, []);
+
+      return (
+        <div className="min-h-screen text-slate-800 selection:bg-indigo-100 selection:text-indigo-900">
+          {view === 'hub' ? (
+            <GameHub
+              games={CURRICULUM_GAMES}
+              customGames={customGames}
+              onSelectGame={handleSelectGame}
+              userProfile={userProfile}
+              onOpenProfile={() => { SoundBus.playPop(); setShowProfileModal(true); }}
+              onOpenStudio={() => { SoundBus.playPop(); setShowStudioModal(true); }}
+              isMuted={isMuted}
+              onToggleMute={handleToggleMute}
+            />
+          ) : (
+            <UniversalGameRunner
+              game={activeGame}
+              onBack={handleBackToHub}
+              onCompleteLevel={handleCompleteLevel}
+              currentStars={userProfile.stars}
+            />
+          )}
+
+          {/* Profile Modal */}
+          <AvatarModal
+            isOpen={showProfileModal}
+            onClose={() => setShowProfileModal(false)}
+            currentProfile={userProfile}
+            onSaveProfile={handleSaveProfile}
+          />
+
+          {/* AI Studio Modal */}
+          <AIGameStudioModal
+            isOpen={showStudioModal}
+            onClose={() => setShowStudioModal(false)}
+            onSaveCustomGame={handleSaveCustomGame}
+          />
+
+          {/* Floating Subtitle Voice Feedback Banner */}
+          <SubtitleBanner />
+        </div>
+      );
+    };
+
+    // =========================================================================
+    // MOUNT TO DOM
+    // =========================================================================
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

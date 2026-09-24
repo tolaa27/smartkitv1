@@ -198,6 +198,43 @@ const STORAGE_KEYS = {
 // In-memory fallback cache for Node.js / API route environments when Supabase is not connected
 const inMemoryStore = new Map<string, any>();
 
+// ----------------------------------------------------------------------------
+// 5-Minute In-Memory API Response Cache (Zero Refetching on Tab Switches)
+// ----------------------------------------------------------------------------
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const apiCache = new Map<string, CacheEntry<unknown>>();
+const CACHE_TTL_MS = 1000 * 60 * 5; // 5-minute stale window
+
+export function getFromApiCache<T>(key: string): T | null {
+  const entry = apiCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    apiCache.delete(key);
+    return null;
+  }
+  return entry.data as T;
+}
+
+export function setInApiCache<T>(key: string, data: T): void {
+  apiCache.set(key, { data, timestamp: Date.now() });
+}
+
+export function invalidateApiCache(prefix?: string): void {
+  if (!prefix) {
+    apiCache.clear();
+    return;
+  }
+  for (const key of apiCache.keys()) {
+    if (key.startsWith(prefix)) {
+      apiCache.delete(key);
+    }
+  }
+}
+
 function getLocalData<T>(key: string, defaultData: T): T {
   if (typeof window === 'undefined') {
     if (!inMemoryStore.has(key)) {
@@ -234,15 +271,20 @@ export const SupabaseService = {
   // 1. GRADES MANAGEMENT
   // --------------------------------------------------------------------------
   async getGrades(): Promise<Grade[]> {
+    const cacheKey = 'grades:all';
+    const cached = getFromApiCache<Grade[]>(cacheKey);
+    if (cached) return cached;
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();
         const { data, error } = await supabase
           .from('grades')
-          .select('*')
+          .select('id, name, description, teacher_id, created_at, student_count, document_count')
           .order('name', { ascending: true });
 
         if (!error && data && data.length > 0) {
+          setInApiCache(cacheKey, data as Grade[]);
           return data as Grade[];
         }
       } catch (err) {
@@ -250,7 +292,9 @@ export const SupabaseService = {
       }
     }
 
-    return getLocalData<Grade[]>(STORAGE_KEYS.GRADES, DEFAULT_GRADES);
+    const localGrades = getLocalData<Grade[]>(STORAGE_KEYS.GRADES, DEFAULT_GRADES);
+    setInApiCache(cacheKey, localGrades);
+    return localGrades;
   },
 
   async createGrade(input: CreateGradeInput): Promise<Grade> {
@@ -293,6 +337,7 @@ export const SupabaseService = {
   },
 
   async updateGrade(id: string, updates: Partial<Grade>): Promise<Grade | null> {
+    invalidateApiCache('grades:');
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();
@@ -317,6 +362,7 @@ export const SupabaseService = {
   },
 
   async deleteGrade(id: string): Promise<boolean> {
+    invalidateApiCache('grades:');
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();
@@ -336,11 +382,39 @@ export const SupabaseService = {
   // --------------------------------------------------------------------------
   // 2. DOCUMENTS & WORKSHETS MANAGEMENT
   // --------------------------------------------------------------------------
-  async getDocuments(gradeId?: string, subject?: DocumentSubject | 'all'): Promise<Document[]> {
+  /**
+   * Synchronous fast cache read for instant tab switching without loading spinners
+   */
+  getCachedDocuments(
+    gradeId?: string,
+    subject?: DocumentSubject | 'all',
+    limit: number = 12
+  ): Document[] | null {
+    const cacheKey = `docs:${gradeId || 'all'}:${subject || 'all'}:${limit}`;
+    return getFromApiCache<Document[]>(cacheKey);
+  },
+
+  /**
+   * Paginated and field-pruned document query with 5-minute memory cache
+   * Excludes heavy OCR text blobs on list views for instant loading
+   */
+  async getDocuments(
+    gradeId?: string,
+    subject?: DocumentSubject | 'all',
+    limit: number = 12
+  ): Promise<Document[]> {
+    const cacheKey = `docs:${gradeId || 'all'}:${subject || 'all'}:${limit}`;
+    const cached = getFromApiCache<Document[]>(cacheKey);
+    if (cached) return cached;
+
+    // Prune query: fetch only essential metadata to avoid transferring megabytes of OCR text
+    const ESSENTIAL_FIELDS = 'id, grade_id, uploaded_by, title, subject, file_url, file_type, created_at';
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();
-        let query = (supabase.from('class_documents') as any).select('*');
+        let query = (supabase.from('class_documents') as any)
+          .select(ESSENTIAL_FIELDS);
 
         if (gradeId) {
           query = query.eq('grade_id', gradeId);
@@ -349,14 +423,19 @@ export const SupabaseService = {
           query = query.eq('subject', subject);
         }
 
-        let { data, error } = await query.order('created_at', { ascending: false });
+        let { data, error } = await query
+          .order('created_at', { ascending: false })
+          .limit(limit);
 
         if (error || !data || data.length === 0) {
           // Fallback to legacy documents table/view
-          let fallbackQuery = (supabase.from('documents') as any).select('*');
+          let fallbackQuery = (supabase.from('documents') as any)
+            .select(ESSENTIAL_FIELDS);
           if (gradeId) fallbackQuery = fallbackQuery.eq('grade_id', gradeId);
           if (subject && subject !== 'all') fallbackQuery = fallbackQuery.eq('subject', subject);
-          const fb = await fallbackQuery.order('created_at', { ascending: false });
+          const fb = await fallbackQuery
+            .order('created_at', { ascending: false })
+            .limit(limit);
           if (!fb.error && fb.data && fb.data.length > 0) {
             data = fb.data;
             error = null;
@@ -364,6 +443,7 @@ export const SupabaseService = {
         }
 
         if (!error && data && data.length > 0) {
+          setInApiCache(cacheKey, data as Document[]);
           return data as Document[];
         }
       } catch (err) {
@@ -371,7 +451,7 @@ export const SupabaseService = {
       }
     }
 
-    // Local Fallback with filtering
+    // Local Fallback with filtering & pagination
     let docs = getLocalData<Document[]>(STORAGE_KEYS.DOCUMENTS, DEFAULT_DOCUMENTS);
     if (gradeId) {
       docs = docs.filter(d => d.grade_id === gradeId);
@@ -379,7 +459,52 @@ export const SupabaseService = {
     if (subject && subject !== 'all') {
       docs = docs.filter(d => d.subject === subject);
     }
-    return docs;
+    const paginatedDocs = docs.slice(0, limit);
+    setInApiCache(cacheKey, paginatedDocs);
+    return paginatedDocs;
+  },
+
+  /**
+   * Lazily fetches full document details (including complete OCR text) on demand
+   * when a student taps to inspect a document card
+   */
+  async getDocumentById(id: string): Promise<Document | null> {
+    const cacheKey = `doc:${id}`;
+    const cached = getFromApiCache<Document>(cacheKey);
+    if (cached && cached.ocr_text !== undefined) return cached;
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = createClient();
+        let { data, error } = await (supabase.from('class_documents') as any)
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error || !data) {
+          const fb = await (supabase.from('documents') as any)
+            .select('*')
+            .eq('id', id)
+            .single();
+          if (!fb.error && fb.data) {
+            data = fb.data;
+            error = null;
+          }
+        }
+
+        if (!error && data) {
+          setInApiCache(cacheKey, data as Document);
+          return data as Document;
+        }
+      } catch (err) {
+        console.warn('[SupabaseService] Error fetching document by ID:', err);
+      }
+    }
+
+    const docs = getLocalData<Document[]>(STORAGE_KEYS.DOCUMENTS, DEFAULT_DOCUMENTS);
+    const found = docs.find((d) => d.id === id) || null;
+    if (found) setInApiCache(cacheKey, found);
+    return found;
   },
 
   /**
@@ -495,6 +620,7 @@ export const SupabaseService = {
         }
 
         if (!error && data) {
+          invalidateApiCache('docs:');
           const docData = data as Record<string, any>;
           return {
             ...docData,
@@ -507,6 +633,7 @@ export const SupabaseService = {
     }
 
     // Local Fallback
+    invalidateApiCache('docs:');
     const current = getLocalData<Document[]>(STORAGE_KEYS.DOCUMENTS, DEFAULT_DOCUMENTS);
     const updated = [newDoc, ...current];
     setLocalData(STORAGE_KEYS.DOCUMENTS, updated);
@@ -514,6 +641,7 @@ export const SupabaseService = {
   },
 
   async deleteDocument(id: string): Promise<boolean> {
+    invalidateApiCache('docs:');
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();

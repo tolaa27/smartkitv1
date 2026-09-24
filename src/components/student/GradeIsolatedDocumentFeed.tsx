@@ -32,21 +32,38 @@ export function GradeIsolatedDocumentFeed({
   gradeName = 'ថ្នាក់រៀនរបស់អ្នក',
   searchQuery = '',
 }: GradeIsolatedDocumentFeedProps) {
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // Read from 5-minute memory cache instantly to prevent tab-switch loading flash
+  const [documents, setDocuments] = useState<Document[]>(() => {
+    return SupabaseService.getCachedDocuments(gradeId || undefined, 'all', 12) || [];
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cached = SupabaseService.getCachedDocuments(gradeId || undefined, 'all', 12);
+    return !cached || cached.length === 0;
+  });
   const [selectedSubject, setSelectedSubject] = useState<DocumentSubject | 'all'>('all');
   const [activeDoc, setActiveDoc] = useState<Document | null>(null);
 
   // Read aloud text state
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
-  // Fetch documents for the specific student's grade
+  // Fetch documents for the specific student's grade with 5-minute stale window
   useEffect(() => {
     let isMounted = true;
     async function loadClassDocuments() {
+      // 1. Instant Cache Hit Check
+      const cached = SupabaseService.getCachedDocuments(gradeId || undefined, 'all', 12);
+      if (cached && cached.length > 0) {
+        if (isMounted) {
+          setDocuments(cached);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // 2. Only show loading spinner on cold initial load
       setLoading(true);
       try {
-        const docs = await SupabaseService.getDocuments(gradeId || undefined);
+        const docs = await SupabaseService.getDocuments(gradeId || undefined, 'all', 12);
         if (isMounted) {
           setDocuments(docs);
         }
@@ -62,6 +79,30 @@ export function GradeIsolatedDocumentFeed({
       isMounted = false;
     };
   }, [gradeId]);
+
+  // Open full document modal & fetch on-demand details (including OCR text)
+  const handleOpenDoc = async (doc: Document) => {
+    sound.playPop();
+    setActiveDoc(doc);
+    if (!doc.ocr_text) {
+      try {
+        const fullDoc = await SupabaseService.getDocumentById(doc.id);
+        if (fullDoc && isMountedRef.current) {
+          setActiveDoc(fullDoc);
+        }
+      } catch (err) {
+        console.warn('[GradeIsolatedDocumentFeed] Error fetching full doc details:', err);
+      }
+    }
+  };
+
+  const isMountedRef = React.useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Filter documents by subject and search query
   const filteredDocs = useMemo(() => {
@@ -158,7 +199,7 @@ export function GradeIsolatedDocumentFeed({
 
       {/* Content Grid */}
       {loading ? (
-        <div className="py-16 text-center space-y-3">
+        <div className="py-20 px-4 text-center space-y-3 min-h-[320px] flex flex-col items-center justify-center bg-white/40 border border-dashed border-amber-200/80 rounded-3xl backdrop-blur-2xs">
           <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto" />
           <p className="text-xs text-slate-500 font-medium">កំពុងទាញយកឯកសារមេរៀន...</p>
         </div>
@@ -179,6 +220,9 @@ export function GradeIsolatedDocumentFeed({
           {filteredDocs.map((doc) => {
             const isCamera = doc.file_type === 'camera_capture';
             const isPdf = doc.file_type === 'pdf';
+            const thumbnailUrl = doc.file_url
+              ? doc.file_url.replace('w=1200', 'w=480&q=75')
+              : '';
 
             return (
               <div
@@ -187,19 +231,18 @@ export function GradeIsolatedDocumentFeed({
               >
                 {/* Image / File Preview Box */}
                 <div
-                  onClick={() => {
-                    sound.playPop();
-                    setActiveDoc(doc);
-                  }}
+                  onClick={() => handleOpenDoc(doc)}
                   className="relative w-full h-44 rounded-2xl bg-slate-100 overflow-hidden border border-slate-200/80 cursor-pointer group-hover:brightness-95 transition-all mb-3.5"
                 >
                   <img
-                    src={doc.file_url}
+                    src={thumbnailUrl || doc.file_url}
                     alt={doc.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=800&q=80';
+                        'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=480&q=75';
                     }}
                   />
 
@@ -282,10 +325,7 @@ export function GradeIsolatedDocumentFeed({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => {
-                        sound.playPop();
-                        setActiveDoc(doc);
-                      }}
+                      onClick={() => handleOpenDoc(doc)}
                       className="py-1.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -353,6 +393,8 @@ export function GradeIsolatedDocumentFeed({
                 <img
                   src={activeDoc.file_url}
                   alt={activeDoc.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-auto max-h-[55vh] object-contain"
                 />
               </div>

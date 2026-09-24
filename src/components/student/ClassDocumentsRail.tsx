@@ -198,8 +198,10 @@ export function ClassDocumentsRail({
                       </div>
                     ) : (
                       <img
-                        src={doc.file_url}
+                        src={doc.file_url ? doc.file_url.replace('w=1200', 'w=480&q=75') : ''}
                         alt={doc.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     )}
@@ -326,6 +328,8 @@ export function ClassDocumentsRail({
                   <img
                     src={activeDoc.file_url}
                     alt={activeDoc.title}
+                    loading="lazy"
+                    decoding="async"
                     className="max-h-80 max-w-full object-contain"
                   />
                 )}

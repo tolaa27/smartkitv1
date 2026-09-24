@@ -95,7 +95,7 @@ function StudentDashboardContent() {
         setActiveGradeId(finalGradeId);
         setActiveGradeName(matchedGrade ? matchedGrade.name : `ថ្នាក់ទី ${grade}`);
 
-        const docs = await SupabaseService.getDocuments(finalGradeId);
+        const docs = await SupabaseService.getDocuments(finalGradeId, 'all', 12);
         setClassDocs(docs);
       } catch (err) {
         console.warn('[StudentDashboard] Init error:', err);
@@ -209,6 +209,8 @@ function StudentDashboardContent() {
                   <img
                     src={student.avatarId}
                     alt={student.nickname}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -254,14 +256,14 @@ function StudentDashboardContent() {
       {/* 3. DYNAMIC CONTENT AREA BASED ON ACTIVE TAB                          */}
       {/* -------------------------------------------------------------------- */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6">
-        {/* TAB 1: 📄📑 ឯកសារថ្នាក់រៀន (Default Active Tab) */}
-        {activeTab === 'class_docs' && (
+        {/* TAB 1: 📄📑 ឯកសារថ្នាក់រៀន (Preserved DOM state for instant 0ms tab switching) */}
+        <div className={activeTab === 'class_docs' ? 'block' : 'hidden'}>
           <GradeIsolatedDocumentFeed
             gradeId={activeGradeId}
             gradeName={activeGradeName}
             searchQuery={searchQuery}
           />
-        )}
+        </div>
 
         {/* TAB 2: 📚 មេរៀន MoEYS */}
         {activeTab === 'moeys' && (

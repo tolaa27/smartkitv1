@@ -5,8 +5,7 @@ export class SpeechEngine {
   private static synth: SpeechSynthesis | null =
     typeof window !== 'undefined' ? window.speechSynthesis : null;
   private static audioCtx: AudioContext | null = null;
-  private static fallbackAudio: HTMLAudioElement | null =
-    typeof window !== 'undefined' ? new Audio() : null;
+  private static fallbackAudio: HTMLAudioElement | null = null;
   private static isInitialized: boolean = false;
   private static subtitleListener: ((text: string | null, isSpeaking: boolean) => void) | null = null;
   private static subtitleTimeout: NodeJS.Timeout | null = null;

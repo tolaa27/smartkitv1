@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS public.users (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Backwards compatibility view for profiles
-CREATE OR REPLACE VIEW public.profiles AS 
+-- Backwards compatibility view for profiles (Security Invoker enforces querying user's RLS)
+CREATE OR REPLACE VIEW public.profiles WITH (security_invoker = true) AS 
   SELECT id, email, full_name, role, pin_code, avatar_url, created_by, created_at 
   FROM public.users;
 
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS public.class_documents (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Backward compatibility view for legacy queries targeting `documents`
-CREATE OR REPLACE VIEW public.documents AS 
+-- Backward compatibility view for legacy queries targeting `documents` (Security Invoker enforces querying user's RLS)
+CREATE OR REPLACE VIEW public.documents WITH (security_invoker = true) AS 
   SELECT * FROM public.class_documents;
 
 -- ==============================================================================

@@ -19,13 +19,10 @@ export const SpeakerButton: React.FC<SpeakerButtonProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    // Warm up audio context on mount
-    SpeechEngine.init();
-  }, []);
-
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Initialize audio context lazily on explicit user interaction
+    SpeechEngine.init();
     sound.playPop();
     setIsPlaying(true);
     SpeechEngine.speak(text);

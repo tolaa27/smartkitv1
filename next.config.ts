@@ -5,3 +5,6 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Initialize OpenNext Cloudflare for local development environment
+import("@opennextjs/cloudflare").then((m) => m.initOpenNextCloudflareForDev());

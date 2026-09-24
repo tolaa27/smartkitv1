@@ -13,14 +13,9 @@
 	},
 	"services": [
 		{
+			// Worker name and service name match exactly
 			"binding": "WORKER_SELF_REFERENCE",
 			"service": "smartkids-cambodia"
-		}
-	],
-	"r2_buckets": [
-		{
-			"binding": "NEXT_INC_CACHE_R2_BUCKET",
-			"bucket_name": "smartkids-cambodia-opennext-cache"
 		}
 	],
 	"images": {

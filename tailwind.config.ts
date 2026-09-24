@@ -11,10 +11,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        khmer: ["'Kantumruy Pro'", "'Battambang'", "sans-serif"],
-        kantumruy: ["'Kantumruy Pro'", "sans-serif"],
+        khmer: ["'Kantumruy Pro'", "'Noto Sans Khmer'", "system-ui", "sans-serif"],
+        kantumruy: ["'Kantumruy Pro'", "'Noto Sans Khmer'", "sans-serif"],
         battambang: ["'Battambang'", "cursive", "sans-serif"],
-        display: ["'Fredoka'", "'Kantumruy Pro'", "cursive", "sans-serif"],
+        display: ["'Fredoka'", "'Kantumruy Pro'", "'Noto Sans Khmer'", "cursive", "sans-serif"],
       },
       colors: {
         "sun-yellow": {

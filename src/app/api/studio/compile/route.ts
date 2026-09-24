@@ -1,21 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { compileLessonToGame, LessonInput } from '@/utils/aiCompiler';
-import { GeneratedGameConfig } from '@/types/game';
+import { GeneratedGameConfig, UniversalEngineType, SubjectId, GradeLevel } from '@/types/game';
+import { generateGameWithGemini, isGeminiConfigured } from '@/lib/gemini';
 
 export const runtime = 'nodejs';
 
 /**
  * POST /api/studio/compile
- * AI Lesson-to-Game Parser & Heuristic Compiler
- * Analyzes Khmer lesson content to extract grade level, core vocabulary, and structural relationships,
- * then generates and returns a validated schema payload matching one of the 5 Core Game Engines.
+ * AI Lesson-to-Game Parser & Gemini 2.5 Structured Schema Compiler
+ * Analyzes Khmer lesson content via Google Gemini 2.5 Flash (or heuristic fallback)
+ * to generate and return a validated schema payload matching one of the 5 Core Game Engines.
  */
 export async function POST(request: NextRequest) {
   try {
     let rawText = '';
     let fileName = 'Uploaded Curriculum Document';
-    let forcedSubject: 'science' | 'math' | 'khmer' | undefined = undefined;
-    let forcedGrade: 1 | 2 | 3 | undefined = undefined;
+    let forcedSubject: SubjectId | undefined = undefined;
+    let forcedGrade: GradeLevel | undefined = undefined;
+    let forcedEngine: UniversalEngineType | undefined = undefined;
+    let incomingLessonMaterial: any = undefined;
 
     const contentType = request.headers.get('content-type') || '';
 
@@ -35,18 +38,29 @@ export async function POST(request: NextRequest) {
       }
 
       const sub = formData.get('subject');
-      if (sub === 'science' || sub === 'math' || sub === 'khmer') forcedSubject = sub;
+      if (sub === 'science' || sub === 'math' || sub === 'khmer' || sub === 'social') {
+        forcedSubject = sub as SubjectId;
+      }
       const gr = Number(formData.get('gradeLevel') || formData.get('grade'));
-      if (gr === 1 || gr === 2 || gr === 3) forcedGrade = gr as 1 | 2 | 3;
+      if (gr === 1 || gr === 2 || gr === 3) forcedGrade = gr as GradeLevel;
+
+      const eng = formData.get('forcedEngine');
+      if (typeof eng === 'string' && eng) forcedEngine = eng as UniversalEngineType;
     } else {
       const body = await request.json();
       rawText = body.lessonText || body.rawText || body.ocrString || '';
-      fileName = body.fileName || fileName;
-      if (body.subject === 'science' || body.subject === 'math' || body.subject === 'khmer') {
-        forcedSubject = body.subject;
+      fileName = body.fileName || body.lessonTitle || fileName;
+      if (body.subject === 'science' || body.subject === 'math' || body.subject === 'khmer' || body.subject === 'social') {
+        forcedSubject = body.subject as SubjectId;
       }
       const gr = Number(body.gradeLevel || body.grade);
-      if (gr === 1 || gr === 2 || gr === 3) forcedGrade = gr as 1 | 2 | 3;
+      if (gr === 1 || gr === 2 || gr === 3) forcedGrade = gr as GradeLevel;
+      if (body.forcedEngine || body.engineOverride) {
+        forcedEngine = (body.forcedEngine || body.engineOverride) as UniversalEngineType;
+      }
+      if (body.lessonMaterial || body.lesson_material) {
+        incomingLessonMaterial = body.lessonMaterial || body.lesson_material;
+      }
     }
 
     if (!rawText.trim()) {
@@ -60,8 +74,29 @@ export async function POST(request: NextRequest) {
       fileName,
     };
 
-    // Compile into validated game conforming to 5 Core Engine schemas
-    const generatedGame: GeneratedGameConfig = compileLessonToGame(input);
+    let generatedGame: GeneratedGameConfig;
+    let compilerProvider = 'heuristic';
+
+    // 1. Attempt real Google Gemini 2.5 Flash compilation if API key is configured
+    if (isGeminiConfigured()) {
+      try {
+        generatedGame = await generateGameWithGemini({
+          lessonText: rawText,
+          title: fileName.replace(/\.[^/.]+$/, ''),
+          subject: forcedSubject,
+          gradeLevel: forcedGrade,
+          forcedEngine,
+          lessonMaterial: incomingLessonMaterial,
+        });
+        compilerProvider = 'google-gemini-2.5';
+      } catch (geminiError) {
+        console.warn('Gemini 2.5 compilation error, falling back to heuristic compiler:', geminiError);
+        generatedGame = compileLessonToGame(input);
+      }
+    } else {
+      // 2. Fallback to heuristic deterministic compiler
+      generatedGame = compileLessonToGame(input);
+    }
 
     if (forcedSubject) {
       generatedGame.subject = forcedSubject;
@@ -69,11 +104,23 @@ export async function POST(request: NextRequest) {
     if (forcedGrade) {
       generatedGame.gradeLevel = forcedGrade;
     }
+    if (forcedEngine) {
+      generatedGame.engineType = forcedEngine;
+      generatedGame.template = forcedEngine;
+    }
+    if (incomingLessonMaterial) {
+      generatedGame.lessonMaterial = incomingLessonMaterial;
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Mini-game compiled successfully from MoEYS lesson curriculum',
+      message:
+        compilerProvider === 'google-gemini-2.5'
+          ? 'Mini-game compiled successfully using Google Gemini 2.5 Flash'
+          : 'Mini-game compiled successfully using MoEYS Heuristic Engine',
+      provider: compilerProvider,
       game: generatedGame,
+      gameConfig: generatedGame,
     });
   } catch (error: unknown) {
     const errMessage = error instanceof Error ? error.message : 'Unknown compiler error';

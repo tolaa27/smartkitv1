@@ -39,25 +39,29 @@ class ResilientSpeechService {
       this.currentAudio = audio;
 
       audio.onended = () => {
-        this.isSpeaking = false;
-        this.currentAudio = null;
+        if (this.currentAudio === audio) {
+          this.isSpeaking = false;
+          this.currentAudio = null;
+        }
         if (onEnd) onEnd();
       };
 
       audio.onerror = () => {
-        // Fallback to client-side Web Speech API
+        // Only fallback to client-side Web Speech if speech was not intentionally cancelled by user
+        if (!this.isSpeaking) return;
         this.fallbackWebSpeech(text, onEnd);
       };
 
       await audio.play();
     } catch {
-      // Audio playback blocked or network issue -> fallback to Web Speech
+      // Audio playback blocked or network issue -> fallback to Web Speech ONLY if not stopped
+      if (!this.isSpeaking) return;
       this.fallbackWebSpeech(text, onEnd);
     }
   }
 
   private fallbackWebSpeech(text: string, onEnd?: () => void): void {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !this.isSpeaking) {
       this.isSpeaking = false;
       if (onEnd) onEnd();
       return;

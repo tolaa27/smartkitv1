@@ -99,7 +99,7 @@ export const GameCard: React.FC<GameCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-3xl border-3 border-amber-200/90 hover:border-amber-400 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
+    <div className="bg-white rounded-3xl border-2 border-amber-200/90 hover:border-amber-300 p-5 sm:p-6 shadow-2xs hover:shadow-md hover:scale-105 transition-all duration-200 flex flex-col justify-between group relative overflow-hidden">
       {/* Top Header: Subject Badge + Audio Reader Button */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -108,7 +108,7 @@ export const GameCard: React.FC<GameCardProps> = ({
           >
             {theme.label}
           </span>
-          <span className="text-[11px] font-bold text-slate-400 font-khmer">
+          <span className="text-[11px] font-bold text-slate-500 font-khmer">
             ថ្នាក់ទី {exercise.grade}
           </span>
         </div>
@@ -120,7 +120,7 @@ export const GameCard: React.FC<GameCardProps> = ({
           className={`w-9 h-9 rounded-xl border-2 flex items-center justify-center transition-all cursor-pointer ${
             isSpeaking
               ? 'bg-blue-600 text-white border-blue-700 animate-pulse'
-              : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 hover:border-amber-300 shadow-2xs'
+              : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200 hover:border-amber-300 shadow-2xs'
           }`}
           title="ចុចដើម្បីស្តាប់សំណួរ (Read Question Aloud)"
           aria-label="ស្តាប់សំណួរ"
@@ -131,7 +131,7 @@ export const GameCard: React.FC<GameCardProps> = ({
 
       {/* Center Body: Lesson Title, Question Stem, Visual Preview */}
       <div className="space-y-2 mb-5">
-        <div className="text-xs font-bold text-amber-700 font-khmer flex items-center gap-1">
+        <div className="text-xs font-bold text-amber-800 font-khmer flex items-center gap-1">
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
           <span>{exercise.lessonKh}</span>
         </div>
@@ -141,7 +141,7 @@ export const GameCard: React.FC<GameCardProps> = ({
         </h3>
 
         {exercise.questionEn && (
-          <p className="text-xs text-slate-400 font-medium line-clamp-1">
+          <p className="text-xs text-slate-500 font-medium line-clamp-1">
             {exercise.questionEn}
           </p>
         )}
@@ -172,7 +172,7 @@ export const GameCard: React.FC<GameCardProps> = ({
         <button
           type="button"
           onClick={handlePlayClick}
-          className="min-h-[44px] px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:translate-y-1 text-white font-heading font-black text-sm rounded-2xl shadow-[0_6px_0_#059669] active:shadow-[0_2px_0_#059669] transition-all flex items-center gap-2 cursor-pointer select-none"
+          className="min-h-[42px] px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:translate-y-1 text-white font-heading font-black text-sm rounded-2xl shadow-[0_4px_0_#047857] active:shadow-none transition-all flex items-center gap-2 cursor-pointer select-none"
         >
           <Play className="w-4 h-4 fill-white" />
           <span className="font-khmer">លេងឥឡូវនេះ</span>

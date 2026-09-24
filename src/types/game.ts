@@ -374,6 +374,14 @@ export interface GameMetadata {
   classroom_pin?: string;
 }
 
+export interface LessonMaterial {
+  pdfUrl?: string;
+  pageNumber?: number;
+  snippetBase64?: string;
+  lessonSummaryKhmer?: string;
+  lessonTitleKhmer?: string;
+}
+
 export interface GeneratedGameConfig {
   id: string;
   titleKhmer: string;
@@ -387,6 +395,9 @@ export interface GeneratedGameConfig {
   metadata: GameMetadata;
   levels: GameLevel[];
 
+  // Optional introductory & in-game lesson document reference
+  lessonMaterial?: LessonMaterial;
+
   // snake_case aliases for API payloads
   title_khmer?: string;
   title_english?: string;
@@ -394,6 +405,7 @@ export interface GeneratedGameConfig {
   instructions_khmer?: string;
   instructions_english?: string;
   engine_type?: UniversalEngineType;
+  lesson_material?: LessonMaterial;
 }
 
 // ---------------------------------------------------------------------------
@@ -431,6 +443,7 @@ export interface StudentProfile {
   nickname: string;
   avatarId: string;
   gradeLevel: GradeLevel;
+  gradeId?: string;
   totalStars: number;
   totalScore: number;
   totalGems?: number;

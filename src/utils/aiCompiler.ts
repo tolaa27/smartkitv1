@@ -341,7 +341,8 @@ export function sanitizeAndRepairGameConfig(config: any): GeneratedGameConfig {
   const titleEnglish =
     typeof config.titleEnglish === 'string' ? config.titleEnglish : 'MoEYS Primary Game';
 
-  const validSubjects: SubjectId[] = ['khmer', 'math', 'science'];
+  // Include all 4 MoEYS primary curriculum subjects
+  const validSubjects: SubjectId[] = ['khmer', 'math', 'science', 'social'];
   const subject: SubjectId = validSubjects.includes(config.subject) ? config.subject : 'science';
 
   const gradeLevel: GradeLevel = [1, 2, 3].includes(Number(config.gradeLevel))

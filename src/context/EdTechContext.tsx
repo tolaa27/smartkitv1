@@ -4,7 +4,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { GradeLevel, SubjectId, StudentProfile, GameProgress, GeneratedGameConfig } from '@/types/edtech';
 import { sound } from '@/utils/sound';
 
+export type UserRole = 'student' | 'teacher' | null;
+
 interface EdTechContextType {
+  userRole: UserRole;
+  setUserRole: (role: UserRole) => void;
+  loginAsStudent: (studentProfile?: Partial<StudentProfile>) => void;
+  loginAsTeacher: (email?: string) => void;
+  logout: () => void;
+  isLoadingAuth: boolean;
   grade: GradeLevel;
   setGrade: (grade: GradeLevel) => void;
   activeSubject: SubjectId | 'all';
@@ -36,6 +44,8 @@ const DEFAULT_STUDENT: StudentProfile = {
 const EdTechContext = createContext<EdTechContextType | undefined>(undefined);
 
 export function EdTechProvider({ children }: { children: React.ReactNode }) {
+  const [userRole, setUserRoleState] = useState<UserRole>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
   const [grade, setGradeState] = useState<GradeLevel>(1);
   const [activeSubject, setActiveSubject] = useState<SubjectId | 'all'>('all');
   const [activeGame, setActiveGame] = useState<string | null>(null);
@@ -49,6 +59,19 @@ export function EdTechProvider({ children }: { children: React.ReactNode }) {
   // Load saved state from localStorage
   useEffect(() => {
     try {
+      const savedRole = localStorage.getItem('smartkids_user_role') as UserRole;
+      if (savedRole === 'student' || savedRole === 'teacher') {
+        setUserRoleState(savedRole);
+      } else {
+        setUserRoleState(null);
+      }
+    } catch {
+      setUserRoleState(null);
+    } finally {
+      setIsLoadingAuth(false);
+    }
+
+    try {
       const savedGrade = localStorage.getItem('smartkids_grade');
       if (savedGrade) {
         const parsed = parseInt(savedGrade, 10);
@@ -60,8 +83,16 @@ export function EdTechProvider({ children }: { children: React.ReactNode }) {
       const savedStudent = localStorage.getItem('smartkids_student');
       if (savedStudent) {
         const parsed = JSON.parse(savedStudent);
-        if (parsed && typeof parsed.name === 'string' && typeof parsed.id === 'string') {
-          setStudent(parsed);
+        // StudentProfile uses 'nickname' (with backwards compatibility for legacy 'name')
+        if (
+          parsed &&
+          typeof parsed.id === 'string' &&
+          (typeof parsed.nickname === 'string' || typeof parsed.name === 'string')
+        ) {
+          setStudent({
+            ...parsed,
+            nickname: parsed.nickname || parsed.name || DEFAULT_STUDENT.nickname,
+          });
         }
       }
 
@@ -79,6 +110,46 @@ export function EdTechProvider({ children }: { children: React.ReactNode }) {
     // Check backend connection
     checkBackendHealth();
   }, []);
+
+  const setUserRole = (role: UserRole) => {
+    setUserRoleState(role);
+    try {
+      if (role) {
+        localStorage.setItem('smartkids_user_role', role);
+        document.cookie = `smartkids_user_role=${role}; path=/; max-age=2592000; SameSite=Lax`;
+      } else {
+        localStorage.removeItem('smartkids_user_role');
+        document.cookie = 'smartkids_user_role=; path=/; max-age=0; SameSite=Lax';
+      }
+    } catch {}
+  };
+
+  const loginAsStudent = (studentProfile?: Partial<StudentProfile>) => {
+    setUserRole('student');
+    if (studentProfile) {
+      setStudent(prev => {
+        const updated = { ...prev, ...studentProfile };
+        try {
+          localStorage.setItem('smartkids_student', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+      if (studentProfile.gradeLevel) {
+        setGradeState(studentProfile.gradeLevel);
+        try {
+          localStorage.setItem('smartkids_grade', studentProfile.gradeLevel.toString());
+        } catch {}
+      }
+    }
+  };
+
+  const loginAsTeacher = () => {
+    setUserRole('teacher');
+  };
+
+  const logout = () => {
+    setUserRole(null);
+  };
 
   const checkBackendHealth = () => {
     setIsBackendConnected(true);
@@ -118,16 +189,14 @@ export function EdTechProvider({ children }: { children: React.ReactNode }) {
       completedAt: new Date().toISOString(),
     };
 
-    // Functional state update prevents stale closures across rapid game completions
     setProgressHistory(prev => {
-      const updatedHistory = [newProgress, ...prev];
+      const updated = [newProgress, ...prev.filter(p => p.gameId !== gameId)];
       try {
-        localStorage.setItem('smartkids_progress', JSON.stringify(updatedHistory));
+        localStorage.setItem('smartkids_progress', JSON.stringify(updated));
       } catch {}
-      return updatedHistory;
+      return updated;
     });
 
-    // Update local student stats
     setStudent(prev => {
       const updated = {
         ...prev,
@@ -147,6 +216,12 @@ export function EdTechProvider({ children }: { children: React.ReactNode }) {
   return (
     <EdTechContext.Provider
       value={{
+        userRole,
+        setUserRole,
+        loginAsStudent,
+        loginAsTeacher,
+        logout,
+        isLoadingAuth,
         grade,
         setGrade,
         activeSubject,

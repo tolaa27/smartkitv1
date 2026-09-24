@@ -1,7 +1,15 @@
+// src/app/page.tsx
+// SmartKids Root Platform: Dedicated Student Hub UI (For Kids)
+// Playful, gamified primary edtech experience for Grades 1-3.
+
 'use client';
 
 import React, { useState } from 'react';
-import { EdTechProvider, useEdTech } from '@/context/EdTechContext';
+import { GeneratedGameConfig } from '@/types/game';
+import { SpeechEngine } from '@/utils/speech';
+
+// EdTech context & student mode components
+import { useEdTech } from '@/context/EdTechContext';
 import { HeaderNav } from '@/components/HeaderNav';
 import { GameHub } from '@/components/GameHub';
 import { FruitMarketGame } from '@/components/games/FruitMarketGame';
@@ -11,12 +19,10 @@ import { GeometryTempleGame } from '@/components/games/GeometryTempleGame';
 import { SpellingTrainGame } from '@/components/games/SpellingTrainGame';
 import { HealthyMealGame } from '@/components/games/HealthyMealGame';
 import { UniversalGameRunner } from '@/components/templates/UniversalGameRunner';
-import { AIGameStudio } from '@/components/studio/AIGameStudio';
 import { ClassroomPinModal } from '@/components/ClassroomPinModal';
 import { SubtitleBanner } from '@/components/common/SubtitleBanner';
 import { MoEYSCurriculumApp } from '@/components/curriculum/MoEYSCurriculumApp';
-import { SpeechEngine } from '@/utils/speech';
-import { GeneratedGameConfig } from '@/types/edtech';
+import { TeacherStudioWorkspace } from '@/components/studio/TeacherStudioWorkspace';
 
 function MainEdTechApp() {
   const {
@@ -26,8 +32,9 @@ function MainEdTechApp() {
     setActiveCustomGame,
   } = useEdTech();
 
+  // Root view mode state: 'student' (Student Game Hub) vs 'studio' (Teacher Studio)
+  const [viewMode, setViewMode] = useState<'student' | 'studio'>('student');
   const [curriculumOpen, setCurriculumOpen] = useState<boolean>(false);
-  const [studioOpen, setStudioOpen] = useState<boolean>(false);
   const [pinModalOpen, setPinModalOpen] = useState<boolean>(false);
   const [playSessionId, setPlaySessionId] = useState<number>(() => Date.now());
 
@@ -45,12 +52,46 @@ function MainEdTechApp() {
     setActiveCustomGame(null);
   };
 
+  const handleGoHome = () => {
+    SpeechEngine.stop();
+    setPlaySessionId(Date.now());
+    setActiveGame(null);
+    setActiveCustomGame(null);
+    setCurriculumOpen(false);
+    setViewMode('student');
+  };
+
+  // If in Teacher Studio Mode, render the full Studio Workspace
+  if (viewMode === 'studio') {
+    return (
+      <TeacherStudioWorkspace
+        onBackToStudentMode={() => {
+          SpeechEngine.stop();
+          setViewMode('student');
+        }}
+        onPlayInStudentHub={(game) => {
+          SpeechEngine.stop();
+          setPlaySessionId(Date.now());
+          setActiveGame(null);
+          setActiveCustomGame(game);
+          setViewMode('student');
+        }}
+      />
+    );
+  }
+
+  // Otherwise: Render the Student Mode (Game Hub / Lessons)
   return (
     <div className="min-h-screen flex flex-col bg-[#FFFDF7]">
       <HeaderNav
+        viewMode={viewMode}
+        onToggleViewMode={() => {
+          SpeechEngine.stop();
+          setViewMode('studio');
+        }}
         onOpenStudio={() => {
           SpeechEngine.stop();
-          setStudioOpen(true);
+          setViewMode('studio');
         }}
         onOpenPinModal={() => {
           SpeechEngine.stop();
@@ -60,6 +101,7 @@ function MainEdTechApp() {
           SpeechEngine.stop();
           setCurriculumOpen(true);
         }}
+        onGoHome={handleGoHome}
       />
 
       {/* Floating Active Khmer Speech Subtitle Chip */}
@@ -72,20 +114,6 @@ function MainEdTechApp() {
             onExit={() => {
               SpeechEngine.stop();
               setCurriculumOpen(false);
-            }}
-          />
-        ) : studioOpen ? (
-          <AIGameStudio
-            onPlayGame={game => {
-              SpeechEngine.stop();
-              setStudioOpen(false);
-              setPlaySessionId(Date.now());
-              setActiveCustomGame(game);
-              setActiveGame(null);
-            }}
-            onClose={() => {
-              SpeechEngine.stop();
-              setStudioOpen(false);
             }}
           />
         ) : activeCustomGame ? (
@@ -115,7 +143,7 @@ function MainEdTechApp() {
               <GameHub
                 onOpenStudio={() => {
                   SpeechEngine.stop();
-                  setStudioOpen(true);
+                  setViewMode('studio');
                 }}
                 onOpenPinModal={() => {
                   SpeechEngine.stop();
@@ -136,7 +164,7 @@ function MainEdTechApp() {
       <ClassroomPinModal
         isOpen={pinModalOpen}
         onClose={() => setPinModalOpen(false)}
-        onJoinGame={game => {
+        onJoinGame={(game) => {
           SpeechEngine.stop();
           setPlaySessionId(Date.now());
           setActiveGame(null);
@@ -161,4 +189,3 @@ function MainEdTechApp() {
 export default function Home() {
   return <MainEdTechApp />;
 }
-

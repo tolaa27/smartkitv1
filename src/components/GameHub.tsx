@@ -35,7 +35,9 @@ import {
   CheckCircle2,
   GraduationCap,
   BookOpen,
+  FileText,
 } from 'lucide-react';
+import { ClassDocumentsRail } from '@/components/student/ClassDocumentsRail';
 
 interface GameHubProps {
   onOpenStudio: () => void;
@@ -44,7 +46,7 @@ interface GameHubProps {
   onOpenCurriculum?: () => void;
 }
 
-type HubViewMode = 'moeys' | 'engines' | 'custom';
+type HubViewMode = 'moeys' | 'documents' | 'engines' | 'custom';
 
 export const GameHub: React.FC<GameHubProps> = ({
   onOpenStudio,
@@ -216,10 +218,10 @@ export const GameHub: React.FC<GameHubProps> = ({
       {/* ========================================================================= */}
       {/* 1. HERO BANNER: 3.5D Kid-Friendly Welcome & Daily Quest                   */}
       {/* ========================================================================= */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 p-6 sm:p-8 lg:p-10 border-4 border-amber-300 shadow-[0_16px_36px_rgba(245,158,11,0.22),inset_0_3px_0_rgba(255,255,255,0.7)] text-amber-950">
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 p-6 sm:p-8 lg:p-10 border-2 border-amber-300/80 shadow-[0_12px_28px_rgba(245,158,11,0.18)] text-amber-950">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-8 space-y-4 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-black text-amber-950 border border-white/80 shadow-xs">
+            <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-black text-amber-950 border border-white/80 shadow-2xs">
               <Sparkles className="w-4 h-4 text-amber-600 animate-spin" style={{ animationDuration: '4s' }} />
               <span>កម្មវិធីសិក្សាជាតិ MoEYS • ថ្នាក់ទី {grade} (Grade {grade})</span>
             </div>
@@ -228,13 +230,13 @@ export const GameHub: React.FC<GameHubProps> = ({
               សួស្តី {student.nickname}! តោះរៀនជាមួយ SmartKids
             </h1>
 
-            <p className="text-sm sm:text-base font-bold text-amber-950/90 font-khmer max-w-xl">
+            <p className="text-sm sm:text-base font-bold text-amber-950 font-khmer max-w-xl">
               រៀនគណិតវិទ្យា ភាសាខ្មែរ វិទ្យាសាស្ត្រ និងសិក្សាសង្គម តាមរយៈល្បែងអប់រំ ៣.៥D សប្បាយៗ!
             </p>
           </div>
 
           <div className="lg:col-span-4 flex justify-center">
-            <div className="w-28 h-28 sm:w-36 sm:h-36 bg-white/80 rounded-3xl p-3 border-3 border-amber-200 shadow-xl flex items-center justify-center text-6xl sm:text-7xl transform hover:scale-105 transition-transform">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/90 rounded-3xl p-3 border-2 border-amber-200 shadow-md flex items-center justify-center text-5xl sm:text-6xl transform hover:scale-105 transition-transform">
               <span className="animate-bounce-gentle">🐘</span>
             </div>
           </div>
@@ -253,7 +255,7 @@ export const GameHub: React.FC<GameHubProps> = ({
             </h2>
           </div>
 
-          <span className="text-xs font-bold text-slate-400 font-khmer">
+          <span className="text-xs font-bold text-slate-500 font-khmer">
             ថ្នាក់ទី {grade}
           </span>
         </div>
@@ -269,7 +271,7 @@ export const GameHub: React.FC<GameHubProps> = ({
       {/* ========================================================================= */}
       {/* 3. SUB-BAR: Real-time Search Input & View Mode Switcher                  */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-3xl border-2 border-amber-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-3xl border-2 border-amber-200/80 shadow-2xs">
         {/* Mode Switcher Pills */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
@@ -278,9 +280,9 @@ export const GameHub: React.FC<GameHubProps> = ({
               sound.playPop();
               setViewMode('moeys');
             }}
-            className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all btn-squishy cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
               viewMode === 'moeys'
-                ? 'bg-emerald-500 text-white shadow-[0_4px_0_#047857]'
+                ? 'bg-emerald-500 text-white shadow-[0_3px_0_#047857]'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
             }`}
           >
@@ -291,11 +293,27 @@ export const GameHub: React.FC<GameHubProps> = ({
             type="button"
             onClick={() => {
               sound.playPop();
+              setViewMode('documents');
+            }}
+            className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'documents'
+                ? 'bg-amber-500 text-white shadow-[0_3px_0_#B45309]'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>📑 ឯកសារថ្នាក់រៀន</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              sound.playPop();
               setViewMode('engines');
             }}
-            className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all btn-squishy cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
               viewMode === 'engines'
-                ? 'bg-blue-600 text-white shadow-[0_4px_0_#1D4ED8]'
+                ? 'bg-blue-600 text-white shadow-[0_3px_0_#1D4ED8]'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
             }`}
           >
@@ -308,9 +326,9 @@ export const GameHub: React.FC<GameHubProps> = ({
               sound.playPop();
               setViewMode('custom');
             }}
-            className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all btn-squishy cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'custom'
-                ? 'bg-purple-600 text-white shadow-[0_4px_0_#7E22CE]'
+                ? 'bg-purple-600 text-white shadow-[0_3px_0_#7E22CE]'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
             }`}
           >
@@ -327,7 +345,7 @@ export const GameHub: React.FC<GameHubProps> = ({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="ស្វែងរកហ្គេម និងមេរៀន..."
-            className="w-full pl-9 pr-8 py-2.5 rounded-2xl border-2 border-amber-200 focus:border-amber-400 outline-none text-xs font-bold bg-[#FFFDF7] focus:bg-white transition-colors"
+            className="w-full pl-9 pr-8 py-2.5 rounded-2xl border-2 border-amber-200/80 focus:border-amber-400 outline-hidden text-xs font-bold bg-[#FFFDF7] focus:bg-white transition-colors"
           />
           {searchQuery && (
             <button
@@ -349,9 +367,9 @@ export const GameHub: React.FC<GameHubProps> = ({
       {viewMode === 'moeys' && (
         <div className="space-y-6">
           {filteredExercises.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border-3 border-dashed border-amber-300 space-y-3">
+            <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-amber-300 space-y-3">
               <div className="text-4xl">🔍</div>
-              <h3 className="font-heading font-black text-slate-800 text-lg">
+              <h3 className="font-heading font-black text-slate-900 text-lg">
                 មិនមានមេរៀនដែលត្រូវនឹងការស្វែងរកទេ
               </h3>
               <p className="text-xs text-slate-500 font-khmer">
@@ -363,7 +381,7 @@ export const GameHub: React.FC<GameHubProps> = ({
                   setSelectedSubject('all');
                   setSearchQuery('');
                 }}
-                className="px-5 py-2 bg-amber-500 text-amber-950 font-black text-xs rounded-xl hover:bg-amber-600 transition"
+                className="px-5 py-2.5 bg-amber-400 text-amber-950 font-black text-xs rounded-xl hover:bg-amber-300 transition cursor-pointer"
               >
                 បង្ហាញមេរៀនទាំងអស់
               </button>
@@ -384,6 +402,24 @@ export const GameHub: React.FC<GameHubProps> = ({
               })}
             </div>
           )}
+
+          {/* Teacher Uploaded Class Documents Rail */}
+          <div className="pt-6 border-t-2 border-amber-200/60">
+            <ClassDocumentsRail
+              currentGradeLevel={grade}
+              selectedSubject={selectedSubject}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* VIEW: DEDICATED CLASS DOCUMENTS & WORKSHEETS TAB */}
+      {viewMode === 'documents' && (
+        <div className="space-y-6">
+          <ClassDocumentsRail
+            currentGradeLevel={grade}
+            selectedSubject={selectedSubject}
+          />
         </div>
       )}
 
@@ -394,14 +430,14 @@ export const GameHub: React.FC<GameHubProps> = ({
             {filteredEngineGames.map(game => (
               <div
                 key={game.id}
-                className="bg-white rounded-3xl p-6 border-3 border-blue-200/80 hover:border-blue-400 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-blue-200/80 hover:border-blue-300 shadow-2xs hover:shadow-md hover:scale-105 transition-all duration-200 flex flex-col justify-between group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black px-2.5 py-1 rounded-full bg-blue-100 text-blue-900 border border-blue-200">
                       {game.subject === 'math' ? 'គណិតវិទ្យា' : game.subject === 'science' ? 'វិទ្យាសាស្ត្រ' : 'ភាសាខ្មែរ'}
                     </span>
-                    <span className="text-xs font-bold text-slate-400">
+                    <span className="text-xs font-bold text-slate-500">
                       ថ្នាក់ទី {game.gradeLevel}
                     </span>
                   </div>
@@ -416,7 +452,7 @@ export const GameHub: React.FC<GameHubProps> = ({
                 </div>
 
                 <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-400 font-mono">
+                  <span className="text-[11px] font-bold text-slate-500 font-mono">
                     Engine: {game.engineType || game.template}
                   </span>
                   <button
@@ -425,7 +461,7 @@ export const GameHub: React.FC<GameHubProps> = ({
                       sound.playPop();
                       onSelectGame(game);
                     }}
-                    className="min-h-[44px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:translate-y-1 text-white font-heading font-black text-sm rounded-2xl shadow-[0_5px_0_#1D4ED8] active:shadow-[0_2px_0_#1D4ED8] transition-all flex items-center gap-2 cursor-pointer"
+                    className="min-h-[42px] px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:translate-y-1 text-white font-heading font-black text-sm rounded-2xl shadow-[0_4px_0_#1D4ED8] active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <Play className="w-4 h-4 fill-white" />
                     <span>លេងឥឡូវនេះ</span>
@@ -494,7 +530,7 @@ export const GameHub: React.FC<GameHubProps> = ({
               {customGames.map(game => (
                 <div
                   key={game.id}
-                  className="bg-white rounded-3xl p-6 border-3 border-purple-200 hover:border-purple-400 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                  className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-purple-200/80 hover:border-purple-300 shadow-2xs hover:shadow-md hover:scale-105 transition-all duration-200 flex flex-col justify-between group"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -504,7 +540,7 @@ export const GameHub: React.FC<GameHubProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDeleteCustomGame(game.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                         title="លុបហ្គេមនេះ"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -520,7 +556,7 @@ export const GameHub: React.FC<GameHubProps> = ({
                   </div>
 
                   <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-400">
+                    <span className="text-[11px] font-bold text-slate-500">
                       ថ្នាក់ទី {game.gradeLevel || 1}
                     </span>
                     <button
@@ -529,7 +565,7 @@ export const GameHub: React.FC<GameHubProps> = ({
                         sound.playPop();
                         onSelectGame(game);
                       }}
-                      className="min-h-[44px] px-5 py-2.5 bg-purple-600 hover:bg-purple-700 active:translate-y-1 text-white font-heading font-black text-sm rounded-2xl shadow-[0_5px_0_#7E22CE] active:shadow-[0_2px_0_#7E22CE] transition-all flex items-center gap-2 cursor-pointer"
+                      className="min-h-[42px] px-5 py-2.5 bg-purple-600 hover:bg-purple-700 active:translate-y-1 text-white font-heading font-black text-sm rounded-2xl shadow-[0_4px_0_#7E22CE] active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
                     >
                       <Play className="w-4 h-4 fill-white" />
                       <span>លេងឥឡូវនេះ</span>

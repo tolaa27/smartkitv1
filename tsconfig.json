@@ -1,4 +1,4 @@
-npm run dev{
+{
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -22,8 +22,7 @@ npm run dev{
       "@/*": ["./src/*"]
     }
   },
-  "include":
-
+  "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",

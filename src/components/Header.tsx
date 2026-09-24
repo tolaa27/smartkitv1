@@ -23,12 +23,16 @@ interface HeaderProps {
   onOpenStudio?: () => void;
   onOpenPinModal?: () => void;
   onOpenCurriculum?: () => void;
+  viewMode?: 'student' | 'studio';
+  onToggleViewMode?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onOpenStudio,
   onOpenPinModal,
   onOpenCurriculum,
+  viewMode = 'student',
+  onToggleViewMode,
 }) => {
   const {
     grade,
@@ -233,12 +237,40 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenCurriculum();
               }}
               className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs btn-squishy shadow-xs border border-purple-700 select-none"
-              title="វិញ្ញាសាកម្មវិធីសិក្សាជាតិ MoEYS (ថ្នាក់ទី ១-២)"
+              title="វិញ្ញាសាកម្មវិធីសិក្សាជាតិ MoEYS (ថ្នាក់ទី ១-៣)"
             >
               <BookOpen className="w-4 h-4" />
               <span>វិញ្ញាសា MoEYS</span>
             </button>
           )}
+
+          {/* Teacher AI Studio / Student Hub Toggle Action Button */}
+          <button
+            type="button"
+            onClick={() => {
+              sound.playPop();
+              if (onToggleViewMode) {
+                onToggleViewMode();
+              } else if (onOpenStudio) {
+                onOpenStudio();
+              }
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border-b-4 active:border-b-0 active:translate-y-1 font-kantumruy font-bold text-xs sm:text-sm leading-[1.8] shadow-md transition-all select-none cursor-pointer ${
+              viewMode === 'studio'
+                ? 'bg-amber-400 hover:bg-amber-300 border-amber-600 text-amber-950'
+                : 'bg-purple-600 hover:bg-purple-500 border-purple-800 text-white'
+            }`}
+            title={
+              viewMode === 'studio'
+                ? 'ត្រឡប់ទៅមជ្ឈមណ្ឌលសិស្ស (Student Hub)'
+                : 'ស្ទូឌីយោគ្រូ (Teacher Studio)'
+            }
+          >
+            <GraduationCap className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.4]" />
+            <span className="hidden sm:inline">
+              {viewMode === 'studio' ? 'មជ្ឈមណ្ឌលសិស្ស' : 'ស្ទូឌីយោគ្រូ'}
+            </span>
+          </button>
 
           {/* Big Sound / Voice-Over Speaker Button */}
           <button
@@ -295,20 +327,24 @@ export const Header: React.FC<HeaderProps> = ({
                     className="w-full px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-950 text-xs font-bold flex items-center gap-2 transition-colors text-left"
                   >
                     <BookOpen className="w-4 h-4 text-purple-700" />
-                    <span>វិញ្ញាសា MoEYS ថ្នាក់ទី ១-២</span>
+                    <span>វិញ្ញាសា MoEYS ថ្នាក់ទី ១-៣</span>
                   </button>
                 )}
 
-                {onOpenStudio && (
+                {(onOpenStudio || onToggleViewMode) && (
                   <button
                     onClick={() => {
                       setSettingsOpen(false);
-                      onOpenStudio();
+                      if (onToggleViewMode) {
+                        onToggleViewMode();
+                      } else if (onOpenStudio) {
+                        onOpenStudio();
+                      }
                     }}
                     className="w-full px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-bold flex items-center gap-2 transition-colors text-left"
                   >
                     <Sparkles className="w-4 h-4 text-amber-700" />
-                    <span>AI Game Studio (បង្កើតហ្គេម)</span>
+                    <span>{viewMode === 'studio' ? 'ត្រឡប់ទៅមជ្ឈមណ្ឌលសិស្ស' : 'AI Game Studio (បង្កើតហ្គេម)'}</span>
                   </button>
                 )}
 

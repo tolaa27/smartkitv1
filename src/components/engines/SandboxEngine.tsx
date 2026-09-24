@@ -56,16 +56,7 @@ export const SandboxEngine: React.FC<SandboxEngineProps> = ({ level, onLevelComp
     if (isOptimal) {
       setGerminationStage(5);
       const interval = setInterval(() => {
-        setThriveTimer(prev => {
-          if (prev >= 2) {
-            clearInterval(interval);
-            sound.playSuccessChime();
-            sound.playStarCelebration();
-            onLevelComplete(120);
-            return 3;
-          }
-          return prev + 1;
-        });
+        setThriveTimer(prev => prev + 1);
       }, 1000);
       return () => clearInterval(interval);
     } else {
@@ -76,7 +67,19 @@ export const SandboxEngine: React.FC<SandboxEngineProps> = ({ level, onLevelComp
       else if (avg < 65) setGerminationStage(3);
       else setGerminationStage(4);
     }
-  }, [moisture, light, compost, mode, onLevelComplete]);
+  }, [moisture, light, compost, mode]);
+
+  // Clean completion side-effect trigger (prevents React 18/19 state-updater mutation warnings)
+  useEffect(() => {
+    if (mode === 'germination' && thriveTimer >= 3) {
+      sound.playSuccessChime();
+      sound.playStarCelebration();
+      const t = setTimeout(() => {
+        onLevelComplete(120);
+      }, 500);
+      return () => clearTimeout(t);
+    }
+  }, [mode, thriveTimer, onLevelComplete]);
 
   // -------------------------------------------------------------------------
   // 2. BENTO NUTRITION BALANCE STATE

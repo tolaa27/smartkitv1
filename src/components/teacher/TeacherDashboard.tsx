@@ -96,6 +96,10 @@ export function TeacherDashboard() {
   const handleLogout = () => {
     sound.playPop();
     logout();
+    if (typeof document !== 'undefined') {
+      document.cookie = 'smartkids_user_role=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'smartkids_teacher_email=; path=/; max-age=0; SameSite=Lax';
+    }
     router.push('/login');
   };
 

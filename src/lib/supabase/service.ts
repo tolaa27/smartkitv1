@@ -734,10 +734,15 @@ export const SupabaseService = {
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${window.location.origin}/teacher`,
+            redirectTo: `${origin}/auth/callback?next=/teacher/dashboard`,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            },
           },
         });
         return { error };

@@ -369,12 +369,15 @@ export function TeacherStudioWorkspace({
     setIsFullscreenCanvas((prev) => !prev);
   };
 
-  // Handle Return to Student Hub
+  // Handle Return to Student Hub or Previous Page
   const handleBack = () => {
+    soundSynthesizer.playPop();
     if (onBackToStudentMode) {
       onBackToStudentMode();
+    } else if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
     } else {
-      router.push('/');
+      router.push('/teacher/dashboard');
     }
   };
 
@@ -400,9 +403,12 @@ export function TeacherStudioWorkspace({
           <button
             onClick={handleBack}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl bg-amber-50 hover:bg-amber-100/80 text-amber-950 border-2 border-amber-300 shadow-[0_3px_0_0_#F59E0B] active:translate-y-[2px] active:shadow-none transition cursor-pointer font-bold text-xs sm:text-sm font-heading"
+            title="ត្រឡប់ទៅទំព័រមុន (Back)"
           >
             <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
-            <span className="leading-relaxed">ត្រឡប់ទៅមជ្ឈមណ្ឌលសិស្ស</span>
+            <span className="leading-relaxed">
+              {onBackToStudentMode ? 'ត្រឡប់ទៅមជ្ឈមណ្ឌលសិស្ស' : 'ត្រឡប់ក្រោយ (Back)'}
+            </span>
           </button>
 
           <div className="h-6 w-px bg-amber-200 hidden sm:block" />

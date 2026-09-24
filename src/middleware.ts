@@ -1,5 +1,5 @@
 // src/middleware.ts
-// SmartKids Next.js Auth Middleware: Strict Role-Based Dashboard Protection with Supabase SSR Session Refresh
+// SmartKids Next.js Auth Middleware: Non-blocking Session Refresh & Clean Navigation History
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -23,7 +23,6 @@ export async function middleware(request: NextRequest) {
 
   // 3. Read role cookie (synced by client and server during login)
   const roleCookie = request.cookies.get('smartkids_user_role')?.value;
-  // If Supabase has an authenticated Google OAuth teacher session or cookie is teacher
   const isTeacher = roleCookie === 'teacher' || Boolean(user);
   const isStudent = roleCookie === 'student';
   const isAuthenticated = Boolean(isTeacher || isStudent);
@@ -36,18 +35,7 @@ export async function middleware(request: NextRequest) {
     return redirectResponse;
   };
 
-  // 4. Handle login routes (/login, /login/teacher, /login/student)
-  if (pathname === '/login' || pathname.startsWith('/login/')) {
-    if (isTeacher) {
-      return withCookies(NextResponse.redirect(new URL('/teacher/dashboard', request.url)));
-    }
-    if (isStudent) {
-      return withCookies(NextResponse.redirect(new URL('/student/dashboard', request.url)));
-    }
-    return supabaseResponse;
-  }
-
-  // 5. Protect Teacher Routes (/teacher, /teacher/dashboard, /studio)
+  // 4. Protect Teacher Routes (/teacher, /teacher/dashboard, /studio)
   if (pathname.startsWith('/teacher') || pathname.startsWith('/studio')) {
     if (!isAuthenticated) {
       const loginUrl = new URL('/login/teacher', request.url);
@@ -55,23 +43,27 @@ export async function middleware(request: NextRequest) {
       return withCookies(NextResponse.redirect(loginUrl));
     }
 
-    if (!isTeacher) {
+    if (!isTeacher && isStudent) {
       return withCookies(NextResponse.redirect(new URL('/student/dashboard', request.url)));
     }
 
     return supabaseResponse;
   }
 
-  // 6. Protect Student Routes (/student and root /)
-  if (pathname === '/' || pathname.startsWith('/student')) {
+  // 5. Protect Dedicated Student Dashboard (/student/dashboard)
+  if (pathname.startsWith('/student/dashboard')) {
     if (!isAuthenticated) {
-      const loginUrl = new URL('/login', request.url);
+      const loginUrl = new URL('/login/student', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
       return withCookies(NextResponse.redirect(loginUrl));
     }
 
     return supabaseResponse;
   }
 
+  // 6. Root `/`, `/login`, and `/login/**` routes are fully accessible.
+  // This ensures browser 'Back' button and 'Return to old page' links never get
+  // trapped in an infinite redirect loop when users switch roles or navigate backward.
   return supabaseResponse;
 }
 

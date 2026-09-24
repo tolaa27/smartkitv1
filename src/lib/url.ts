@@ -73,9 +73,23 @@ export function getAbsoluteUrl(path: string = ''): string {
  * @returns Fully qualified OAuth callback URL (e.g. 'https://smartkids.vercel.app/auth/callback?next=%2Fteacher%2Fdashboard')
  */
 export function getOAuthCallbackUrl(
-  path: string = '/auth/callback',
-  next: string = '/teacher/dashboard'
+  pathOrNext: string = '/auth/callback',
+  optionalNext?: string
 ): string {
+  let path = '/auth/callback';
+  let next = '/teacher/dashboard';
+
+  if (optionalNext !== undefined) {
+    path = pathOrNext;
+    next = optionalNext;
+  } else if (pathOrNext) {
+    if (pathOrNext.startsWith('/auth')) {
+      path = pathOrNext;
+    } else {
+      next = pathOrNext;
+    }
+  }
+
   const callbackUrl = getAbsoluteUrl(path);
   const cleanNext = next.startsWith('/') ? next : `/${next}`;
   return `${callbackUrl}?next=${encodeURIComponent(cleanNext)}`;

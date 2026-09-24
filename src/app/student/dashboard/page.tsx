@@ -84,10 +84,11 @@ export default function StudentDashboardPage() {
     sound.playPop();
     logout();
     if (typeof document !== 'undefined') {
-      document.cookie = 'smartkids_role=; path=/; max-age=0';
-      document.cookie = 'smartkids_student_session=; path=/; max-age=0';
-      document.cookie = 'smartkids_student_id=; path=/; max-age=0';
-      document.cookie = 'smartkids_grade_id=; path=/; max-age=0';
+      document.cookie = 'smartkids_user_role=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'smartkids_role=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'smartkids_student_session=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'smartkids_student_id=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'smartkids_grade_id=; path=/; max-age=0; SameSite=Lax';
     }
     router.push('/login/student');
   };

@@ -31,6 +31,7 @@ import {
   Download,
   Loader2,
   LogIn,
+  ChevronDown,
 } from 'lucide-react';
 
 // Platform types & utilities
@@ -622,31 +623,37 @@ export function TeacherStudioWorkspace({
                 <label className="block text-xs font-bold text-amber-900 font-khmer mb-1.5 leading-relaxed">
                   មុខវិជ្ជា ៖
                 </label>
-                <select
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value as SubjectId)}
-                  className="w-full px-3 py-2 rounded-2xl border-2 border-amber-200/80 focus:border-amber-400 focus:outline-hidden font-khmer font-bold text-xs sm:text-sm text-amber-950 bg-amber-50/20 leading-relaxed transition-colors"
-                >
-                  <option value="science">វិទ្យាសាស្ត្រ (Science)</option>
-                  <option value="math">គណិតវិទ្យា (Math)</option>
-                  <option value="khmer">ភាសាខ្មែរ (Khmer)</option>
-                  <option value="social">សិក្សាសង្គម (Social)</option>
-                </select>
+                <div className="relative flex items-center">
+                  <select
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value as SubjectId)}
+                    className="w-full h-11 pl-3 pr-9 rounded-xl border-2 border-amber-200/80 focus:border-amber-400 focus:outline-hidden font-khmer font-bold text-xs sm:text-sm text-amber-950 bg-amber-50/20 leading-relaxed transition-colors appearance-none cursor-pointer"
+                  >
+                    <option value="science">វិទ្យាសាស្ត្រ (Science)</option>
+                    <option value="math">គណិតវិទ្យា (Math)</option>
+                    <option value="khmer">ភាសាខ្មែរ (Khmer)</option>
+                    <option value="social">សិក្សាសង្គម (Social)</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-amber-600 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-amber-900 font-khmer mb-1.5 leading-relaxed">
                   កម្រិតថ្នាក់ ៖
                 </label>
-                <select
-                  value={gradeLevel}
-                  onChange={(e) => setGradeLevel(Number(e.target.value) as GradeLevel)}
-                  className="w-full px-3 py-2 rounded-2xl border-2 border-amber-200/80 focus:border-amber-400 focus:outline-hidden font-khmer font-bold text-xs sm:text-sm text-amber-950 bg-amber-50/20 leading-relaxed transition-colors"
-                >
-                  <option value={1}>ថ្នាក់ទី ១ (Grade 1)</option>
-                  <option value={2}>ថ្នាក់ទី ២ (Grade 2)</option>
-                  <option value={3}>ថ្នាក់ទី ៣ (Grade 3)</option>
-                </select>
+                <div className="relative flex items-center">
+                  <select
+                    value={gradeLevel}
+                    onChange={(e) => setGradeLevel(Number(e.target.value) as GradeLevel)}
+                    className="w-full h-11 pl-3 pr-9 rounded-xl border-2 border-amber-200/80 focus:border-amber-400 focus:outline-hidden font-khmer font-bold text-xs sm:text-sm text-amber-950 bg-amber-50/20 leading-relaxed transition-colors appearance-none cursor-pointer"
+                  >
+                    <option value={1}>ថ្នាក់ទី ១ (Grade 1)</option>
+                    <option value={2}>ថ្នាក់ទី ២ (Grade 2)</option>
+                    <option value={3}>ថ្នាក់ទី ៣ (Grade 3)</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-amber-600 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
             </div>
 
@@ -737,23 +744,26 @@ export function TeacherStudioWorkspace({
                 <label className="block text-[11px] font-bold text-amber-900 font-khmer mb-1 leading-relaxed">
                   ប្តូរម៉ាស៊ីនល្បែងដោយខ្លួនឯង (Engine Override) ៖
                 </label>
-                <select
-                  value={selectedEngineOverride || ''}
-                  onChange={(e) =>
-                    setSelectedEngineOverride(
-                      e.target.value ? (e.target.value as UniversalEngineType) : null
-                    )
-                  }
-                  className="w-full px-2.5 py-1.5 rounded-xl border border-amber-300 text-xs font-mono font-bold text-amber-950 bg-white leading-relaxed"
-                >
-                  <option value="">-- ប្រើម៉ាស៊ីនស្វ័យប្រវត្តិតាម AI --</option>
-                  <option value="sorter">Sorter (ការចាត់ថ្នាក់ / ញែកធាតុ)</option>
-                  <option value="sequencer">Sequencer (លំដាប់លំដោយ / ដំណាក់កាល)</option>
-                  <option value="market_math">Market Math (ទីផ្សារគណិតវិទ្យា)</option>
-                  <option value="khmer_trace">Khmer Trace (គូសតួអក្សរ / ព្យាង្គ)</option>
-                  <option value="sandbox">Sandbox (ពិសោធន៍បរិស្ថាន / រុក្ខជាតិ)</option>
-                  <option value="mcq">MCQ Quiz (កម្រងសំណួរពហុជ្រើសរើស)</option>
-                </select>
+                <div className="relative flex items-center">
+                  <select
+                    value={selectedEngineOverride || ''}
+                    onChange={(e) =>
+                      setSelectedEngineOverride(
+                        e.target.value ? (e.target.value as UniversalEngineType) : null
+                      )
+                    }
+                    className="w-full h-10 pl-2.5 pr-8 rounded-xl border border-amber-300 text-xs font-mono font-bold text-amber-950 bg-white leading-relaxed appearance-none cursor-pointer"
+                  >
+                    <option value="">-- ប្រើម៉ាស៊ីនស្វ័យប្រវត្តិតាម AI --</option>
+                    <option value="sorter">Sorter (ការចាត់ថ្នាក់ / ញែកធាតុ)</option>
+                    <option value="sequencer">Sequencer (លំដាប់លំដោយ / ដំណាក់កាល)</option>
+                    <option value="market_math">Market Math (ទីផ្សារគណិតវិទ្យា)</option>
+                    <option value="khmer_trace">Khmer Trace (គូសតួអក្សរ / ព្យាង្គ)</option>
+                    <option value="sandbox">Sandbox (ពិសោធន៍បរិស្ថាន / រុក្ខជាតិ)</option>
+                    <option value="mcq">MCQ Quiz (កម្រងសំណួរពហុជ្រើសរើស)</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-amber-600 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
             </div>
 

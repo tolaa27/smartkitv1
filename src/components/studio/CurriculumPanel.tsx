@@ -13,6 +13,7 @@ import {
   Coins,
   Boxes,
   Compass,
+  ChevronDown,
 } from 'lucide-react';
 import { SubjectId, GradeLevel } from '@/types/game';
 import { PRESET_MOEYS_LESSONS, PresetLesson } from '@/utils/aiCompiler';
@@ -92,31 +93,37 @@ export const CurriculumPanel: React.FC<CurriculumPanelProps> = ({
             <label className="block text-[11px] font-bold text-slate-500 mb-1">
               មុខវិជ្ជា (Subject)
             </label>
-            <select
-              value={subject}
-              onChange={(e) => onSubjectChange(e.target.value as SubjectId)}
-              className="w-full px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-hidden transition cursor-pointer"
-            >
-              <option value="science">វិទ្យាសាស្ត្រ (Science)</option>
-              <option value="math">គណិតវិទ្យា (Math)</option>
-              <option value="khmer">ភាសាខ្មែរ (Khmer)</option>
-              <option value="social">សិក្សាសង្គម (Social)</option>
-            </select>
+            <div className="relative flex items-center">
+              <select
+                value={subject}
+                onChange={(e) => onSubjectChange(e.target.value as SubjectId)}
+                className="w-full h-10 pl-2.5 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-hidden transition cursor-pointer appearance-none"
+              >
+                <option value="science">វិទ្យាសាស្ត្រ (Science)</option>
+                <option value="math">គណិតវិទ្យា (Math)</option>
+                <option value="khmer">ភាសាខ្មែរ (Khmer)</option>
+                <option value="social">សិក្សាសង្គម (Social)</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
 
           <div>
             <label className="block text-[11px] font-bold text-slate-500 mb-1">
               កម្រិតថ្នាក់ (Grade)
             </label>
-            <select
-              value={grade}
-              onChange={(e) => onGradeChange(Number(e.target.value) as GradeLevel)}
-              className="w-full px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-hidden transition cursor-pointer"
-            >
-              <option value={1}>ថ្នាក់ទី ១ (Grade 1)</option>
-              <option value={2}>ថ្នាក់ទី ២ (Grade 2)</option>
-              <option value={3}>ថ្នាក់ទី ៣ (Grade 3)</option>
-            </select>
+            <div className="relative flex items-center">
+              <select
+                value={grade}
+                onChange={(e) => onGradeChange(Number(e.target.value) as GradeLevel)}
+                className="w-full h-10 pl-2.5 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-hidden transition cursor-pointer appearance-none"
+              >
+                <option value={1}>ថ្នាក់ទី ១ (Grade 1)</option>
+                <option value={2}>ថ្នាក់ទី ២ (Grade 2)</option>
+                <option value={3}>ថ្នាក់ទី ៣ (Grade 3)</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
         </div>
 

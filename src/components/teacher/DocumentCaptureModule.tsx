@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Loader2,
   Volume2,
+  ChevronDown,
 } from 'lucide-react';
 import { Grade, DocumentSubject, DocumentFileType } from '@/lib/supabase/types';
 import { SupabaseService } from '@/lib/supabase/service';
@@ -444,18 +445,21 @@ export function DocumentCaptureModule({
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 កម្រិតថ្នាក់ (Grade Level) *
               </label>
-              <select
-                value={selectedGradeId}
-                onChange={(e) => setSelectedGradeId(e.target.value)}
-                required
-                className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white font-medium text-xs text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-              >
-                {grades.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative flex items-center">
+                <select
+                  value={selectedGradeId}
+                  onChange={(e) => setSelectedGradeId(e.target.value)}
+                  required
+                  className="w-full h-11 pl-3.5 pr-10 rounded-xl border border-slate-200 bg-white font-medium text-xs text-slate-900 appearance-none cursor-pointer focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-xs"
+                >
+                  {grades.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
 
             {/* Subject Selection (Strictly Khmer, Math, Science) */}

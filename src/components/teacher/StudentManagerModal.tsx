@@ -18,6 +18,7 @@ import {
   GraduationCap,
   Copy,
   Printer,
+  ChevronDown,
 } from 'lucide-react';
 import { Profile, Grade } from '@/lib/supabase/types';
 import { SupabaseService } from '@/lib/supabase/service';
@@ -319,18 +320,21 @@ export function StudentManagerModal({
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     កម្រិតថ្នាក់ (Assigned Grade) *
                   </label>
-                  <select
-                    value={gradeId}
-                    onChange={(e) => setGradeId(e.target.value)}
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 bg-white font-khmer text-xs focus:ring-2 focus:ring-indigo-500/20"
-                  >
-                    {grades.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative flex items-center">
+                    <select
+                      value={gradeId}
+                      onChange={(e) => setGradeId(e.target.value)}
+                      required
+                      className="w-full h-11 pl-3.5 pr-10 rounded-xl border border-indigo-200 bg-white font-khmer text-xs appearance-none cursor-pointer focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    >
+                      {grades.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-indigo-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 

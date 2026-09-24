@@ -24,22 +24,39 @@ import {
   X,
   CheckCircle2,
   Download,
+  Loader2,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
-import { Grade, Document, DocumentSubject } from '@/lib/supabase/types';
-import { SupabaseService } from '@/lib/supabase/service';
+import { Grade, Document, DocumentSubject, Profile } from '@/lib/supabase/types';
+import { SupabaseService, invalidateApiCache } from '@/lib/supabase/service';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { DocumentCaptureModule } from './DocumentCaptureModule';
 import { ClassManagerModal } from './ClassManagerModal';
 import { StudentManagerModal } from './StudentManagerModal';
 import { useEdTech } from '@/context/EdTechContext';
 import { sound } from '@/utils/sound';
 
+interface TeacherIdentity {
+  id: string;
+  email?: string;
+  full_name?: string;
+}
+
 export function TeacherDashboard() {
   const router = useRouter();
   const { logout } = useEdTech();
 
+  // Auth & Session Readiness States
+  const [user, setUser] = useState<TeacherIdentity | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // Data states
   const [grades, setGrades] = useState<Grade[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [students, setStudents] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filter states
@@ -53,24 +70,147 @@ export function TeacherDashboard() {
   const [studentManagerOpen, setStudentManagerOpen] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
 
-  const loadData = useCallback(async () => {
+  // 1. Resolve Teacher Auth Session reliably before querying DB
+  useEffect(() => {
+    let isMounted = true;
+
+    async function resolveTeacherAuth() {
+      try {
+        if (isSupabaseConfigured()) {
+          const supabase = createClient();
+          // Check fast local session first
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user && isMounted) {
+            const u = session.user;
+            const meta = u.user_metadata || {};
+            setUser({
+              id: u.id,
+              email: u.email,
+              full_name: meta.full_name || meta.name || u.email?.split('@')[0] || 'អ្នកគ្រូ-លោកគ្រូ',
+            });
+            setAuthReady(true);
+            return;
+          }
+
+          // Remote session token verification
+          const { data: { user: verifiedUser } } = await supabase.auth.getUser();
+          if (verifiedUser && isMounted) {
+            const meta = verifiedUser.user_metadata || {};
+            setUser({
+              id: verifiedUser.id,
+              email: verifiedUser.email,
+              full_name: meta.full_name || meta.name || verifiedUser.email?.split('@')[0] || 'អ្នកគ្រូ-លោកគ្រូ',
+            });
+            setAuthReady(true);
+            return;
+          }
+        }
+
+        // Cookie & Demo Session Fallback
+        if (typeof document !== 'undefined') {
+          const hasTeacherCookie = document.cookie.includes('smartkids_user_role=teacher');
+          if (hasTeacherCookie && isMounted) {
+            const match = document.cookie.match(/smartkids_teacher_email=([^;]+)/);
+            const teacherEmail = match ? decodeURIComponent(match[1]) : 'teacher@smartkids.edu.kh';
+            setUser({
+              id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', // Teacher Sokha standard seed ID
+              email: teacherEmail,
+              full_name: teacherEmail.includes('vanna')
+                ? 'លោកគ្រូ វណ្ណា (Teacher Vanna)'
+                : 'អ្នកគ្រូ សុខា (Teacher Sokha)',
+            });
+            setAuthReady(true);
+            return;
+          }
+        }
+
+        // Default demo teacher fallback
+        if (isMounted) {
+          setUser({
+            id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+            email: 'teacher@smartkids.edu.kh',
+            full_name: 'អ្នកគ្រូ សុខា (Teacher Sokha)',
+          });
+          setAuthReady(true);
+        }
+      } catch (err) {
+        console.error('[TeacherDashboard] Auth resolution error:', err);
+        if (isMounted) {
+          setUser({
+            id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+            email: 'teacher@smartkids.edu.kh',
+            full_name: 'អ្នកគ្រូ សុខា (Teacher Sokha)',
+          });
+          setAuthReady(true);
+        }
+      }
+    }
+
+    resolveTeacherAuth();
+
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user && isMounted) {
+          const u = session.user;
+          const meta = u.user_metadata || {};
+          setUser({
+            id: u.id,
+            email: u.email,
+            full_name: meta.full_name || meta.name || u.email?.split('@')[0] || 'អ្នកគ្រូ-លោកគ្រូ',
+          });
+          setAuthReady(true);
+        }
+      });
+
+      return () => {
+        isMounted = false;
+        subscription.unsubscribe();
+      };
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // 2. Fetch Dashboard Data
+  const loadData = useCallback(async (bypassCache: boolean = false) => {
+    setLoading(true);
+    setFetchError(null);
     try {
-      const [fetchedGrades, fetchedDocs] = await Promise.all([
-        SupabaseService.getGrades(),
-        SupabaseService.getDocuments(),
+      const [fetchedGrades, fetchedDocs, fetchedStudents] = await Promise.all([
+        SupabaseService.getGrades(bypassCache),
+        SupabaseService.getDocuments(undefined, 'all', 100, bypassCache),
+        SupabaseService.getStudents(undefined, bypassCache),
       ]);
       setGrades(fetchedGrades);
       setDocuments(fetchedDocs);
-    } catch (err) {
-      console.warn('[TeacherDashboard] Error loading data:', err);
+      setStudents(fetchedStudents);
+    } catch (err: any) {
+      console.error('[TeacherDashboard] Error loading data:', err);
+      setFetchError(err?.message || 'មានបញ្ហាក្នុងការទាញយកទិន្នន័យពីម៉ាស៊ីនបម្រើ');
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
+  // 3. Session Readiness Guard: Run queries only AFTER auth is verified and user.id is resolved
   useEffect(() => {
+    if (!authReady || !user?.id) {
+      return;
+    }
     loadData();
-  }, [loadData]);
+  }, [authReady, user?.id, loadData]);
+
+  // Manual Refresh Handler
+  const handleManualRefresh = () => {
+    sound.playPop();
+    setIsRefreshing(true);
+    invalidateApiCache();
+    loadData(true);
+  };
 
   // Filter documents
   const filteredDocuments = documents.filter((doc) => {
@@ -89,7 +229,7 @@ export function TeacherDashboard() {
     if (confirm('តើអ្នកពិតជាចង់លុបឯកសារនេះមែនទេ?')) {
       await SupabaseService.deleteDocument(id);
       sound.playSuccessChime();
-      loadData();
+      loadData(true);
     }
   };
 
@@ -152,13 +292,24 @@ export function TeacherDashboard() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium leading-none mt-0.5">
-                Teacher Management & OCR Studio
+                {user?.full_name ? `${user.full_name} • OCR Studio` : 'Teacher Management & OCR Studio'}
               </p>
             </div>
           </div>
 
           {/* Right Action Hub */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Refresh Sync Button */}
+            <button
+              type="button"
+              onClick={handleManualRefresh}
+              disabled={loading || isRefreshing}
+              className="p-2 rounded-xl border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-indigo-600 bg-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+              title="ផ្ទុកឡើងវិញ (Refresh Data)"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading || isRefreshing ? 'animate-spin text-indigo-600' : ''}`} />
+            </button>
+
             {/* Class Manager Trigger */}
             <button
               type="button"
@@ -280,7 +431,11 @@ export function TeacherDashboard() {
               <span className="text-xs font-semibold text-slate-500">ថ្នាក់រៀន</span>
               <span className="p-2 rounded-xl bg-indigo-50 text-indigo-600">🏫</span>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{grades.length}</div>
+            {loading || !authReady ? (
+              <div className="h-8 w-14 bg-slate-200 animate-pulse rounded-lg my-1" />
+            ) : (
+              <div className="text-2xl font-bold text-slate-900">{grades.length}</div>
+            )}
             <span className="text-[11px] text-slate-500 mt-0.5 block">កម្រិតមត្តេយ្យ ដល់ ថ្នាក់ទី៣</span>
           </div>
 
@@ -289,7 +444,11 @@ export function TeacherDashboard() {
               <span className="text-xs font-semibold text-slate-500">ឯកសារ & សន្លឹកកិច្ចការ</span>
               <span className="p-2 rounded-xl bg-amber-50 text-amber-600">📑</span>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{documents.length}</div>
+            {loading || !authReady ? (
+              <div className="h-8 w-14 bg-slate-200 animate-pulse rounded-lg my-1" />
+            ) : (
+              <div className="text-2xl font-bold text-slate-900">{documents.length}</div>
+            )}
             <span className="text-[11px] text-slate-500 mt-0.5 block">ក្នុង Supabase Storage</span>
           </div>
 
@@ -304,9 +463,13 @@ export function TeacherDashboard() {
               <span className="text-xs font-semibold text-slate-500 group-hover:text-amber-800">កូនសិស្សចុះឈ្មោះ</span>
               <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">🎒</span>
             </div>
-            <div className="text-2xl font-bold text-slate-900">
-              {grades.reduce((acc, g) => acc + (g.student_count || 20), 0)}
-            </div>
+            {loading || !authReady ? (
+              <div className="h-8 w-14 bg-slate-200 animate-pulse rounded-lg my-1" />
+            ) : (
+              <div className="text-2xl font-bold text-slate-900">
+                {students.length > 0 ? students.length : grades.reduce((acc, g) => acc + (g.student_count || 20), 0)}
+              </div>
+            )}
             <span className="text-[11px] text-amber-700 font-semibold mt-0.5 block">
               ចុចមើល & គ្រប់គ្រង PIN &rarr;
             </span>
@@ -358,37 +521,47 @@ export function TeacherDashboard() {
                 <Filter className="w-3.5 h-3.5" />
                 <span>ថ្នាក់ ៖</span>
               </span>
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playPop();
-                  setSelectedGradeId('all');
-                }}
-                className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  selectedGradeId === 'all'
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                ទាំងអស់ ({documents.length})
-              </button>
-              {grades.map((g) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => {
-                    sound.playPop();
-                    setSelectedGradeId(g.id);
-                  }}
-                  className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    selectedGradeId === g.id
-                      ? 'bg-indigo-600 text-white shadow-2xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {g.name}
-                </button>
-              ))}
+              {loading || !authReady ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-20 bg-slate-200 animate-pulse rounded-xl" />
+                  <div className="h-7 w-24 bg-slate-200 animate-pulse rounded-xl" />
+                  <div className="h-7 w-24 bg-slate-200 animate-pulse rounded-xl" />
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playPop();
+                      setSelectedGradeId('all');
+                    }}
+                    className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedGradeId === 'all'
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    ទាំងអស់ ({documents.length})
+                  </button>
+                  {grades.map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => {
+                        sound.playPop();
+                        setSelectedGradeId(g.id);
+                      }}
+                      className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        selectedGradeId === g.id
+                          ? 'bg-indigo-600 text-white shadow-2xs'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {g.name}
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
 
             {/* Subject Filter */}
@@ -421,7 +594,31 @@ export function TeacherDashboard() {
           </div>
 
           {/* Documents Grid */}
-          {filteredDocuments.length === 0 ? (
+          {loading || !authReady ? (
+            <div className="py-16 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-indigo-600">
+                <Loader2 className="w-6 h-6 animate-spin" />
+              </div>
+              <p className="text-sm font-bold text-slate-700">កំពុងផ្ទុកទិន្នន័យថ្នាក់រៀន និងស្ថិតិគ្រូ...</p>
+              <p className="text-xs text-slate-400">កំពុងផ្ទៀងផ្ទាត់សិទ្ធិ និងទាញយកឯកសារមេរៀន</p>
+            </div>
+          ) : fetchError ? (
+            <div className="py-12 text-center space-y-3 bg-rose-50/50 rounded-2xl border border-rose-200 p-6">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <p className="text-sm font-bold text-rose-800">{fetchError}</p>
+              <p className="text-xs text-slate-500">សូមពិនិត្យមើលការតភ្ជាប់អ៊ីនធឺណិត ឬសាកល្បងម្តងទៀត</p>
+              <button
+                type="button"
+                onClick={handleManualRefresh}
+                className="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>ព្យាយាមម្តងទៀត (Retry)</span>
+              </button>
+            </div>
+          ) : filteredDocuments.length === 0 ? (
             <div className="py-12 text-center space-y-3">
               <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-2xl mx-auto">
                 📂
@@ -433,7 +630,7 @@ export function TeacherDashboard() {
               <button
                 type="button"
                 onClick={() => setCaptureOpen(true)}
-                className="py-2 px-4 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700"
+                className="py-2 px-4 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700 cursor-pointer"
               >
                 ថត ឬផ្ទុកឡើងឥឡូវនេះ
               </button>
@@ -538,7 +735,7 @@ export function TeacherDashboard() {
               grades={grades}
               onSuccess={() => {
                 setCaptureOpen(false);
-                loadData();
+                loadData(true);
               }}
               onCancel={() => setCaptureOpen(false)}
             />
@@ -551,7 +748,7 @@ export function TeacherDashboard() {
         grades={grades}
         isOpen={classManagerOpen}
         onClose={() => setClassManagerOpen(false)}
-        onRefresh={loadData}
+        onRefresh={() => loadData(true)}
       />
 
       {/* Student Manager Modal */}
@@ -559,7 +756,7 @@ export function TeacherDashboard() {
         grades={grades}
         isOpen={studentManagerOpen}
         onClose={() => setStudentManagerOpen(false)}
-        onRefresh={loadData}
+        onRefresh={() => loadData(true)}
       />
 
       {/* Document Detailed Preview Modal */}

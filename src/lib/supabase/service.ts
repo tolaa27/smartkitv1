@@ -270,10 +270,12 @@ export const SupabaseService = {
   // --------------------------------------------------------------------------
   // 1. GRADES MANAGEMENT
   // --------------------------------------------------------------------------
-  async getGrades(): Promise<Grade[]> {
+  async getGrades(bypassCache: boolean = false): Promise<Grade[]> {
     const cacheKey = 'grades:all';
-    const cached = getFromApiCache<Grade[]>(cacheKey);
-    if (cached) return cached;
+    if (!bypassCache) {
+      const cached = getFromApiCache<Grade[]>(cacheKey);
+      if (cached) return cached;
+    }
 
     if (isSupabaseConfigured()) {
       try {
@@ -283,12 +285,16 @@ export const SupabaseService = {
           .select('id, name, description, teacher_id, created_at, student_count, document_count')
           .order('name', { ascending: true });
 
+        if (error) {
+          console.error('[SupabaseService] getGrades error from Supabase:', error);
+        }
+
         if (!error && data && data.length > 0) {
           setInApiCache(cacheKey, data as Grade[]);
           return data as Grade[];
         }
       } catch (err) {
-        console.warn('[SupabaseService] Error fetching grades from Supabase, falling back to local:', err);
+        console.error('[SupabaseService] Exception fetching grades from Supabase:', err);
       }
     }
 
@@ -401,11 +407,14 @@ export const SupabaseService = {
   async getDocuments(
     gradeId?: string,
     subject?: DocumentSubject | 'all',
-    limit: number = 12
+    limit: number = 100,
+    bypassCache: boolean = false
   ): Promise<Document[]> {
     const cacheKey = `docs:${gradeId || 'all'}:${subject || 'all'}:${limit}`;
-    const cached = getFromApiCache<Document[]>(cacheKey);
-    if (cached) return cached;
+    if (!bypassCache) {
+      const cached = getFromApiCache<Document[]>(cacheKey);
+      if (cached) return cached;
+    }
 
     // Prune query: fetch only essential metadata to avoid transferring megabytes of OCR text
     const ESSENTIAL_FIELDS = 'id, grade_id, uploaded_by, title, subject, file_url, file_type, created_at';
@@ -427,6 +436,10 @@ export const SupabaseService = {
           .order('created_at', { ascending: false })
           .limit(limit);
 
+        if (error) {
+          console.error('[SupabaseService] Error querying class_documents:', error);
+        }
+
         if (error || !data || data.length === 0) {
           // Fallback to legacy documents table/view
           let fallbackQuery = (supabase.from('documents') as any)
@@ -436,6 +449,9 @@ export const SupabaseService = {
           const fb = await fallbackQuery
             .order('created_at', { ascending: false })
             .limit(limit);
+          if (fb.error) {
+            console.error('[SupabaseService] Error querying fallback documents view:', fb.error);
+          }
           if (!fb.error && fb.data && fb.data.length > 0) {
             data = fb.data;
             error = null;
@@ -447,7 +463,7 @@ export const SupabaseService = {
           return data as Document[];
         }
       } catch (err) {
-        console.warn('[SupabaseService] Error fetching documents from Supabase, falling back to local:', err);
+        console.error('[SupabaseService] Exception fetching documents from Supabase:', err);
       }
     }
 
@@ -696,37 +712,60 @@ export const SupabaseService = {
     );
   },
 
-  async getStudents(gradeId?: string): Promise<Profile[]> {
+  async getStudents(gradeId?: string, bypassCache: boolean = false): Promise<Profile[]> {
+    const cacheKey = `students:${gradeId || 'all'}`;
+    if (!bypassCache) {
+      const cached = getFromApiCache<Profile[]>(cacheKey);
+      if (cached) return cached;
+    }
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();
+        // First try selecting from profiles view
         let query = (supabase.from('profiles') as any)
-          .select('*, grades:grade_id(name)')
+          .select('*')
           .eq('role', 'student');
 
         if (gradeId) {
           query = query.eq('grade_id', gradeId);
         }
 
-        const { data, error } = await query.order('created_at', { ascending: false });
+        let { data, error } = await query.order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('[SupabaseService] Error querying profiles view for students:', error);
+          // Fallback to querying users table directly
+          const usersQuery = (supabase.from('users') as any)
+            .select('*')
+            .eq('role', 'student');
+          const res = await usersQuery.order('created_at', { ascending: false });
+          if (!res.error && res.data) {
+            data = res.data;
+            error = null;
+          } else if (res.error) {
+            console.error('[SupabaseService] Error querying users table for students:', res.error);
+          }
+        }
 
         if (!error && data && data.length > 0) {
-          return data.map((item: any) => ({
+          const mapped = data.map((item: any) => ({
             ...item,
-            grade_name: item.grades?.name || undefined,
+            grade_name: item.grade_name || undefined,
           })) as Profile[];
+          setInApiCache(cacheKey, mapped);
+          return mapped;
         }
       } catch (err) {
-        console.warn('[SupabaseService] Error fetching students from Supabase:', err);
+        console.error('[SupabaseService] Exception fetching students:', err);
       }
     }
 
     const profiles = getLocalData<Profile[]>(STORAGE_KEYS.PROFILES, DEFAULT_PROFILES);
-    const students = profiles.filter(p => p.role === 'student');
-    if (gradeId) {
-      return students.filter(s => s.grade_id === gradeId);
-    }
-    return students;
+    const students = profiles.filter((p) => p.role === 'student');
+    const result = gradeId ? students.filter((s) => s.grade_id === gradeId) : students;
+    setInApiCache(cacheKey, result);
+    return result;
   },
 
   async createStudentAccount(input: CreateStudentInput): Promise<Profile> {

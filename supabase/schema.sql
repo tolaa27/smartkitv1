@@ -28,8 +28,20 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 -- Backwards compatibility view for profiles (Security Invoker enforces querying user's RLS)
 CREATE OR REPLACE VIEW public.profiles WITH (security_invoker = true) AS 
-  SELECT id, email, full_name, role, pin_code, avatar_url, created_by, created_at 
-  FROM public.users;
+  SELECT 
+    u.id, 
+    u.email, 
+    u.full_name, 
+    u.role, 
+    u.pin_code, 
+    u.avatar_url, 
+    u.created_by, 
+    u.created_at,
+    cm.grade_id,
+    g.name AS grade_name
+  FROM public.users u
+  LEFT JOIN public.class_members cm ON u.id = cm.student_id
+  LEFT JOIN public.grades g ON cm.grade_id = g.id;
 
 -- B. Grades Table (e.g. 'ថ្នាក់ទី ១', 'ថ្នាក់មត្តេយ្យ', 'ថ្នាក់ទី ២', 'ថ្នាក់ទី ៣')
 CREATE TABLE IF NOT EXISTS public.grades (
@@ -39,6 +51,10 @@ CREATE TABLE IF NOT EXISTS public.grades (
   teacher_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Backwards compatibility view for classes (Security Invoker enforces querying user's RLS)
+CREATE OR REPLACE VIEW public.classes WITH (security_invoker = true) AS 
+  SELECT * FROM public.grades;
 
 -- C. Class Members Table (Links Students strictly to their assigned Grade)
 CREATE TABLE IF NOT EXISTS public.class_members (

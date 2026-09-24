@@ -63,13 +63,13 @@ export function StudentManagerModal({
   // Cards print view modal state
   const [showPrintCards, setShowPrintCards] = useState<boolean>(false);
 
-  const loadStudents = useCallback(async () => {
+  const loadStudents = useCallback(async (bypassCache: boolean = true) => {
     setLoading(true);
     try {
-      const data = await SupabaseService.getStudents();
+      const data = await SupabaseService.getStudents(undefined, bypassCache);
       setStudents(data);
     } catch (err) {
-      console.warn('[StudentManagerModal] Fetch error:', err);
+      console.error('[StudentManagerModal] Fetch error:', err);
     } finally {
       setLoading(false);
     }

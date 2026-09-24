@@ -82,7 +82,7 @@ export function LoginPage() {
         });
 
         setTimeout(() => {
-          router.push('/');
+          router.push('/student');
         }, 600);
       } else {
         sound.playErrorThud();
@@ -92,7 +92,7 @@ export function LoginPage() {
     } catch {
       // Fallback
       loginAsStudent({ nickname: 'ចរិយា (Chariya)', gradeLevel: 1 });
-      router.push('/');
+      router.push('/student');
     }
   };
 
@@ -184,7 +184,7 @@ export function LoginPage() {
                 avatarId: st.avatarId,
                 gradeLevel: st.gradeLevel,
               });
-              router.push('/');
+              router.push('/student');
             }}
           />
         )}

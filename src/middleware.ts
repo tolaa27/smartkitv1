@@ -50,8 +50,8 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // 5. Protect Dedicated Student Dashboard (/student/dashboard)
-  if (pathname.startsWith('/student/dashboard')) {
+  // 5. Protect Dedicated Student Dashboard (/student and /student/**)
+  if (pathname === '/student' || pathname.startsWith('/student/')) {
     if (!isAuthenticated) {
       const loginUrl = new URL('/login/student', request.url);
       loginUrl.searchParams.set('redirect', pathname);

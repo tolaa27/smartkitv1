@@ -1,19 +1,16 @@
 // src/app/student/dashboard/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Sparkles,
   Star,
   LogOut,
   Volume2,
   VolumeX,
-  GraduationCap,
   BookOpen,
-  Gamepad2,
-  Award,
   ArrowLeft,
   Flame,
 } from 'lucide-react';
@@ -27,13 +24,20 @@ import { MOEYS_CURRICULUM_DATASET } from '@/data/moeysCurriculum';
 import { ALL_42_GAMES } from '@/data/gameCatalog';
 import { UniversalGameRunner } from '@/components/templates/UniversalGameRunner';
 import { GeneratedGameConfig } from '@/types/edtech';
+import { MoEYSCurriculumApp } from '@/components/curriculum/MoEYSCurriculumApp';
 
-export default function StudentDashboardPage() {
+function StudentDashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { student, grade, soundMuted, toggleMute, logout } = useEdTech();
 
-  // Active navigation tab (Default: 'class_docs' as requested)
-  const [activeTab, setActiveTab] = useState<StudentNavTab>('class_docs');
+  // Active navigation tab (Synced with ?tab= query parameter, default: 'class_docs')
+  const tabFromQuery = searchParams.get('tab') as StudentNavTab | null;
+  const validTabs: StudentNavTab[] = ['moeys', 'class_docs', 'games', 'custom'];
+  const initialTab: StudentNavTab =
+    tabFromQuery && validTabs.includes(tabFromQuery) ? tabFromQuery : 'class_docs';
+
+  const [activeTab, setActiveTab] = useState<StudentNavTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Classroom & Grade states
@@ -44,6 +48,28 @@ export default function StudentDashboardPage() {
 
   // Interactive Game runner state
   const [runningGame, setRunningGame] = useState<GeneratedGameConfig | null>(null);
+  // Full MoEYS interactive curriculum view toggle
+  const [fullCurriculumOpen, setFullCurriculumOpen] = useState<boolean>(false);
+
+  // Sync tab state if URL search query changes
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as StudentNavTab | null;
+    if (tabParam && validTabs.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  // Handle Tab Switch without full route reloads (preserves student portal context)
+  const handleTabChange = (tab: StudentNavTab) => {
+    setActiveTab(tab);
+    setRunningGame(null);
+    setFullCurriculumOpen(false);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState(null, '', url.pathname + url.search);
+    }
+  };
 
   // Initialize student grade and load class documents
   useEffect(() => {
@@ -125,18 +151,22 @@ export default function StudentDashboardPage() {
       {/* -------------------------------------------------------------------- */}
       <header className="w-full bg-white/80 border-b border-amber-200/60 px-4 sm:px-6 py-2.5 backdrop-blur-xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
-          {/* Logo & Grade Info */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="w-10 h-10 rounded-2xl bg-linear-to-tr from-amber-400 via-amber-500 to-yellow-400 border border-amber-300 shadow-xs flex items-center justify-center text-2xl hover:scale-105 transition-transform"
-              title="ទំព័រដើម SmartKids"
-            >
+          {/* Logo & Brand: Explicitly routes to /student (staying inside student portal) */}
+          <Link
+            href="/student"
+            onClick={() => {
+              sound.playPop();
+              handleTabChange('class_docs');
+            }}
+            className="flex items-center gap-3 group cursor-pointer select-none focus-visible:outline-none"
+            title="មជ្ឈមណ្ឌលសិស្ស SmartKids"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-linear-to-tr from-amber-400 via-amber-500 to-yellow-400 border border-amber-300 shadow-xs flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
               🎒
-            </Link>
+            </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-sm sm:text-base text-slate-900 leading-tight">
+                <span className="font-bold text-sm sm:text-base text-slate-900 leading-tight group-hover:text-amber-600 transition-colors">
                   កុមារឆ្លាត (SmartKids)
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold border border-amber-200/80">
@@ -147,7 +177,7 @@ export default function StudentDashboardPage() {
                 ថ្នាក់រៀនអន្តរកម្ម MoEYS សម្រាប់កុមារកម្ពុជា
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* Student Avatar & Rewards */}
           <div className="flex items-center gap-2 sm:gap-4">
@@ -207,14 +237,11 @@ export default function StudentDashboardPage() {
       </header>
 
       {/* -------------------------------------------------------------------- */}
-      {/* 2. STICKY KID-FRIENDLY NAVIGATION PILL (Exact UI Match)             */}
+      {/* 2. STICKY KID-FRIENDLY NAVIGATION PILL                               */}
       {/* -------------------------------------------------------------------- */}
       <StudentStickyNavPill
         activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          setRunningGame(null);
-        }}
+        onTabChange={handleTabChange}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         moeysCount={filteredMoeysLessons.length}
@@ -236,69 +263,125 @@ export default function StudentDashboardPage() {
           />
         )}
 
-        {/* TAB 2: 📚 មេរៀន MoEYS (4) */}
+        {/* TAB 2: 📚 មេរៀន MoEYS */}
         {activeTab === 'moeys' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-white rounded-3xl border border-amber-200/80 p-5 shadow-xs flex items-center justify-between">
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <span>📚</span>
-                  <span>កម្មវិធីសិក្សាជាតិ MoEYS ៖ {activeGradeName}</span>
-                </h2>
-                <p className="text-xs text-slate-500 mt-1">
-                  មេរៀនស្របតាមសៀវភៅពុម្ពក្រសួងអប់រំ យុវជន និងកីឡា
-                </p>
+            {fullCurriculumOpen ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playPop();
+                      setFullCurriculumOpen(false);
+                    }}
+                    className="inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>ត្រឡប់ទៅបញ្ជីមេរៀន MoEYS វិញ</span>
+                  </button>
+                </div>
+                <MoEYSCurriculumApp onExit={() => setFullCurriculumOpen(false)} />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredMoeysLessons.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-3xl border-2 border-slate-200/80 hover:border-amber-400 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+            ) : runningGame ? (
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playPop();
+                    setRunningGame(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold">
-                        {item.subject === 'khmer'
-                          ? 'ភាសាខ្មែរ'
-                          : item.subject === 'math'
-                          ? 'គណិតវិទ្យា'
-                          : 'វិទ្យាសាស្ត្រ'}
-                      </span>
-                      <span className="text-xs text-slate-400 font-mono">
-                        {item.grade === 1 ? 'ថ្នាក់ទី១' : `ថ្នាក់ទី${item.grade}`}
-                      </span>
-                    </div>
-
-                    <h3 className="font-bold text-base text-slate-900 leading-snug">
-                      {item.lessonKh}
-                    </h3>
-                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                      {item.questionKh}
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>ត្រឡប់ទៅបញ្ជីមេរៀន MoEYS វិញ</span>
+                </button>
+                <div className="bg-white rounded-3xl border-2 border-amber-300 p-4 sm:p-6 shadow-md">
+                  <UniversalGameRunner
+                    gameConfig={runningGame}
+                    onExit={() => {
+                      sound.playSuccessChime();
+                      setRunningGame(null);
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="bg-white rounded-3xl border border-amber-200/80 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                      <span>📚</span>
+                      <span>កម្មវិធីសិក្សាជាតិ MoEYS ៖ {activeGradeName}</span>
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-1">
+                      មេរៀនស្របតាមសៀវភៅពុម្ពក្រសួងអប់រំ យុវជន និងកីឡា
                     </p>
                   </div>
-
-                  <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-amber-700 flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>{item.type}</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sound.playPop();
-                        const matchingGame = ALL_42_GAMES[0];
-                        setRunningGame(matchingGame);
-                      }}
-                      className="py-1.5 px-3.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs transition-colors shadow-2xs cursor-pointer active:scale-95"
-                    >
-                      រៀន និងលេង
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playPop();
+                      setFullCurriculumOpen(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-linear-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold shadow-xs hover:from-emerald-600 hover:to-teal-700 transition cursor-pointer select-none"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>លំហាត់អន្តរកម្ម MoEYS ពេញលេញ</span>
+                  </button>
                 </div>
-              ))}
-            </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredMoeysLessons.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-3xl border-2 border-slate-200/80 hover:border-amber-400 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold">
+                            {item.subject === 'khmer'
+                              ? 'ភាសាខ្មែរ'
+                              : item.subject === 'math'
+                              ? 'គណិតវិទ្យា'
+                              : 'វិទ្យាសាស្ត្រ'}
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono">
+                            {item.grade === 1 ? 'ថ្នាក់ទី១' : `ថ្នាក់ទី${item.grade}`}
+                          </span>
+                        </div>
+
+                        <h3 className="font-bold text-base text-slate-900 leading-snug">
+                          {item.lessonKh}
+                        </h3>
+                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                          {item.questionKh}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-xs font-semibold text-amber-700 flex items-center gap-1">
+                          <BookOpen className="w-3.5 h-3.5" />
+                          <span>{item.type}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playPop();
+                            const matchingGame =
+                              ALL_42_GAMES.find((g) => g.id === item.id) || ALL_42_GAMES[0];
+                            setRunningGame(matchingGame);
+                          }}
+                          className="py-1.5 px-3.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs transition-colors shadow-2xs cursor-pointer active:scale-95"
+                        >
+                          រៀន និងលេង
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -309,7 +392,10 @@ export default function StudentDashboardPage() {
               <div className="space-y-4">
                 <button
                   type="button"
-                  onClick={() => setRunningGame(null)}
+                  onClick={() => {
+                    sound.playPop();
+                    setRunningGame(null);
+                  }}
                   className="inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -401,7 +487,7 @@ export default function StudentDashboardPage() {
                   type="button"
                   onClick={() => {
                     sound.playPop();
-                    setActiveTab('class_docs');
+                    handleTabChange('class_docs');
                   }}
                   className="py-2.5 px-5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs shadow-xs cursor-pointer transition-all"
                 >
@@ -420,5 +506,19 @@ export default function StudentDashboardPage() {
         កុមារឆ្លាត (SmartKids Cambodia) • វេទិកាអប់រំបឋមសិក្សាអន្តរកម្ម MoEYS
       </footer>
     </div>
+  );
+}
+
+export default function StudentDashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#FBF9F4] flex items-center justify-center text-amber-600 text-sm font-bold font-khmer">
+          កំពុងផ្ទុកមជ្ឈមណ្ឌលសិស្ស...
+        </div>
+      }
+    >
+      <StudentDashboardContent />
+    </Suspense>
   );
 }

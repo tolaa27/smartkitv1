@@ -1,16 +1,16 @@
 // src/middleware.ts
-// SmartKids Next.js Auth Middleware: Strict Role-Based Dashboard Protection
+// SmartKids Next.js Auth Middleware: Strict Role-Based Dashboard Protection with Supabase SSR Session Refresh
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Allow public assets, internal next routes, api endpoints, OAuth callback, and static files
+  // 1. Allow public assets, internal next routes, OAuth callback, and static files without auth checks
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
     pathname.startsWith('/auth') ||
     pathname.startsWith('/portfolio') ||
     pathname.includes('.') // static files like favicon.ico, images, fonts
@@ -18,51 +18,61 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Read role cookie (synced by client and server during login)
+  // 2. Perform Supabase SSR session refresh and synchronize cookies
+  const { supabaseResponse, user } = await updateSession(request);
+
+  // 3. Read role cookie (synced by client and server during login)
   const roleCookie = request.cookies.get('smartkids_user_role')?.value;
-  const isTeacher = roleCookie === 'teacher';
+  // If Supabase has an authenticated Google OAuth teacher session or cookie is teacher
+  const isTeacher = roleCookie === 'teacher' || Boolean(user);
   const isStudent = roleCookie === 'student';
   const isAuthenticated = Boolean(isTeacher || isStudent);
 
-  // 3. Handle login routes (/login, /login/teacher, /login/student)
+  // Helper to persist refreshed cookies during redirects
+  const withCookies = (redirectResponse: NextResponse) => {
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie);
+    });
+    return redirectResponse;
+  };
+
+  // 4. Handle login routes (/login, /login/teacher, /login/student)
   if (pathname === '/login' || pathname.startsWith('/login/')) {
-    // If already authenticated, redirect to appropriate role dashboard
     if (isTeacher) {
-      return NextResponse.redirect(new URL('/teacher/dashboard', request.url));
+      return withCookies(NextResponse.redirect(new URL('/teacher/dashboard', request.url)));
     }
     if (isStudent) {
-      return NextResponse.redirect(new URL('/student/dashboard', request.url));
+      return withCookies(NextResponse.redirect(new URL('/student/dashboard', request.url)));
     }
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
-  // 4. Protect Teacher Routes (/teacher, /teacher/dashboard, /studio)
+  // 5. Protect Teacher Routes (/teacher, /teacher/dashboard, /studio)
   if (pathname.startsWith('/teacher') || pathname.startsWith('/studio')) {
     if (!isAuthenticated) {
       const loginUrl = new URL('/login/teacher', request.url);
       loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
+      return withCookies(NextResponse.redirect(loginUrl));
     }
 
     if (!isTeacher) {
-      // Student attempting to access teacher dashboard -> redirect to student dashboard
-      return NextResponse.redirect(new URL('/student/dashboard', request.url));
+      return withCookies(NextResponse.redirect(new URL('/student/dashboard', request.url)));
     }
 
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
-  // 5. Protect Student Routes (/student and root /)
+  // 6. Protect Student Routes (/student and root /)
   if (pathname === '/' || pathname.startsWith('/student')) {
     if (!isAuthenticated) {
       const loginUrl = new URL('/login', request.url);
-      return NextResponse.redirect(loginUrl);
+      return withCookies(NextResponse.redirect(loginUrl));
     }
 
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 export const config = {
